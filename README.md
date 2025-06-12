@@ -1,6 +1,7 @@
 # @botforge/widget
 
 The official BotForge widget for easy integration into any website or web application.
+To get you **your-chatbot-id** visit [APP](https://botforge.site/#pricing)
 
 ## Installation
 
