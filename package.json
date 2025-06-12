@@ -14,6 +14,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "private": false,
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
@@ -38,11 +39,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/botforge/widget.git"
+    "url": "git+https://github.com/MikeRubio/BotForge.git"
   },
   "homepage": "https://botforge.site",
   "bugs": {
-    "url": "https://github.com/botforge/widget/issues"
+    "url": "https://github.com/MikeRubio/BotForge/issues"
   },
   "peerDependencies": {
     "react": ">=16.8.0",
