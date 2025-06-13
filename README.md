@@ -172,9 +172,6 @@ interface BotForgeConfig {
 
 ```typescript
 interface BotForgeConfig {
-  // API Configuration
-  apiUrl?: string; // Custom API URL (default: 'https://api.botforge.site')
-
   // Appearance
   theme?: BotForgeTheme;
   position?: BotForgePosition;
@@ -209,50 +206,32 @@ interface BotForgeConfig {
 }
 ```
 
-### Theme Customization
+## ⚙️ Setup Instructions
 
-```typescript
-interface BotForgeTheme {
-  primaryColor?: string; // Main brand color (default: '#3B82F6')
-  backgroundColor?: string; // Chat background (default: '#ffffff')
-  textColor?: string; // Text color (default: '#1f2937')
-  borderRadius?: string; // Border radius (default: '12px')
-  fontFamily?: string; // Font family
-  buttonSize?: "small" | "medium" | "large"; // Chat button size
-  chatHeight?: string; // Chat window height (default: '500px')
-  chatWidth?: string; // Chat window width (default: '380px')
-  headerColor?: string; // Header background color
-  userMessageColor?: string; // User message bubble color
-  botMessageColor?: string; // Bot message bubble color
-}
-```
+### 1. Get Your Chatbot ID
 
-### Position Options
+1. Log into your BotForge dashboard
+2. Go to your chatbot settings
+3. Copy the **Chatbot ID** from the integration section
 
-```typescript
-interface BotForgePosition {
-  bottom?: string; // Distance from bottom (default: '20px')
-  right?: string; // Distance from right (default: '20px')
-  left?: string; // Distance from left
-  top?: string; // Distance from top
-}
-```
+### 2. Configure the Widget
 
-### Event Handlers
+Replace the placeholder values in the examples above:
 
-```typescript
-interface BotForgeEvents {
-  onOpen?: () => void; // Chat window opened
-  onClose?: () => void; // Chat window closed
-  onMessage?: (message: BotForgeMessage) => void; // Any message sent/received
-  onUserMessage?: (message: BotForgeMessage) => void; // User sent a message
-  onBotMessage?: (message: BotForgeMessage) => void; // Bot sent a message
-  onError?: (error: Error) => void; // Error occurred
-  onReady?: () => void; // Widget is ready
-  onTyping?: () => void; // Bot is typing
-  onStopTyping?: () => void; // Bot stopped typing
-}
-```
+- `chatbotId: "your-chatbot-id"` → Your actual chatbot ID
+
+## 🌟 Features
+
+✅ **Framework Agnostic** - Works with React, Vue, Angular, and vanilla JavaScript  
+✅ **TypeScript Support** - Built-in TypeScript definitions  
+✅ **Responsive Design** - Optimized for all screen sizes  
+✅ **Customizable Themes** - Complete control over appearance  
+✅ **Event System** - Comprehensive event callbacks  
+✅ **File Upload Support** - Optional file upload functionality  
+✅ **Offline Fallback** - Graceful degradation when API is unavailable  
+✅ **Production Ready** - Optimized bundle size and performance  
+✅ **Accessibility** - WCAG compliant with keyboard navigation  
+✅ **CDN Ready** - Available via unpkg and jsDelivr
 
 ## 🎛️ API Methods
 
@@ -298,19 +277,6 @@ interface BotForgeAPI {
   updateConfig(config: Partial<BotForgeConfig>): void; // Update configuration
 }
 ```
-
-## 🌟 Features
-
-✅ **Framework Agnostic** - Works with React, Vue, Angular, and vanilla JavaScript  
-✅ **TypeScript Support** - Built-in TypeScript definitions  
-✅ **Responsive Design** - Optimized for all screen sizes  
-✅ **Customizable Themes** - Complete control over appearance  
-✅ **Event System** - Comprehensive event callbacks  
-✅ **File Upload Support** - Optional file upload functionality  
-✅ **Offline Fallback** - Graceful degradation when API is unavailable  
-✅ **Production Ready** - Optimized bundle size and performance  
-✅ **Accessibility** - WCAG compliant with keyboard navigation  
-✅ **CDN Ready** - Available via unpkg and jsDelivr
 
 ## 🔧 Advanced Usage
 
@@ -367,10 +333,6 @@ widget.updateConfig({
 });
 ```
 
-## 🌐 Browser Support
-
-TBA
-
 ## 📦 Bundle Size
 
 - ES Module: ~45KB (gzipped)
@@ -397,7 +359,6 @@ TBA
 **API connection failed:**
 
 - Check your network connection
-- Verify the `apiUrl` if using a custom endpoint
 - The widget will work in offline mode with fallback responses
 
 **Styling conflicts:**
@@ -426,10 +387,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - 📖 Documentation: https://botforge.site/docs
 - 🐛 Issues: https://github.com/MikeRubio/BotForge/issues
 
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
----
-
-Made with ❤️ by the [BotForge](https://botforge.site) team.
+Made by the [BotForge](https://botforge.site) team.

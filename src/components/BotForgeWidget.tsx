@@ -11,7 +11,7 @@ import { BotForgeConfig, BotForgeMessage, BotForgeAPI } from "../types";
 import { useBotForgeAPI } from "../hooks/useBotForgeAPI";
 
 const defaultConfig: Partial<BotForgeConfig> = {
-  apiUrl: "https://api.botforge.site",
+  // Remove the default apiUrl - let users specify their Supabase URL
   theme: {
     primaryColor: "#3B82F6",
     backgroundColor: "#ffffff",
@@ -52,6 +52,13 @@ export interface BotForgeWidgetProps extends BotForgeConfig {
 export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
   (props, ref) => {
     const config = { ...defaultConfig, ...props };
+
+    // Validate required props
+    if (!config.chatbotId) {
+      console.error("[BotForge Widget] chatbotId is required");
+      return null;
+    }
+
     const [isOpen, setIsOpen] = useState(config.autoOpen || false);
     const [messages, setMessages] = useState<BotForgeMessage[]>([]);
     const [hasUnreadMessages, setHasUnreadMessages] = useState(false);

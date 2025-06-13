@@ -14,12 +14,35 @@ export class BotForgeAPIClient {
 
   constructor(
     chatbotId: string,
-    apiUrl: string = "https://api.botforge.site",
+    apiUrl: string = "https://shelxkuuslyxfbiaargz.supabase.co",
     debug: boolean = false
   ) {
     this.chatbotId = chatbotId;
-    this.baseUrl = apiUrl.replace(/\/$/, ""); // Remove trailing slash
+
+    // If no apiUrl provided, try to detect from environment or use fallback
+    if (!apiUrl) {
+      // Try to get from window environment variables (if available)
+      if (typeof window !== "undefined" && (window as any).VITE_SUPABASE_URL) {
+        this.baseUrl = (window as any).VITE_SUPABASE_URL;
+      } else {
+        // Fallback to default (this should be overridden by the user)
+        this.baseUrl = "https://shelxkuuslyxfbiaargz.supabase.co";
+        if (debug) {
+          console.warn(
+            "[BotForge Widget] No API URL provided. Please set the apiUrl parameter to your Supabase project URL."
+          );
+        }
+      }
+    } else {
+      this.baseUrl = apiUrl;
+    }
+
+    this.baseUrl = this.baseUrl.replace(/\/$/, ""); // Remove trailing slash
     this.debug = debug;
+
+    if (debug) {
+      console.log("[BotForge Widget] Initialized with API URL:", this.baseUrl);
+    }
 
     // Start connection monitoring
     this.startConnectionMonitoring();

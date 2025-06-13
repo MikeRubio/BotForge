@@ -43,12 +43,13 @@ function App() {
           <li>User information pre-populated</li>
           <li>Custom positioning</li>
           <li>API method calls via ref</li>
+          <li>Offline mode with fallback responses</li>
         </ul>
       </div>
 
       <BotForgeWidget
         ref={widgetRef}
-        chatbotId="demo-chatbot-id"
+        chatbotId="demo-chatbot-id" // ⚠️ UPDATE THIS!
         theme={{
           primaryColor: "#8b5cf6",
           backgroundColor: "#ffffff",
