@@ -1,7 +1,7 @@
 import { BotForgeConfig, BotForgeAPI } from "../types";
-import React from "react";
-import ReactDOM from "react-dom/client";
 import { BotForgeWidget } from "../components/BotForgeWidget";
+import * as ReactDOM from "react-dom/client";
+import React from "react";
 
 declare global {
   interface Window {

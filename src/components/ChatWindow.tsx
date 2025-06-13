@@ -41,6 +41,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputValue.trim() && !isLoading) {
+      if (config.debug) {
+        console.log("[BotForge Widget] Submitting message:", inputValue.trim());
+      }
       onSendMessage(inputValue.trim());
       setInputValue("");
     }
@@ -50,6 +53,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+    if (config.debug) {
+      console.log("[BotForge Widget] Input value changed:", e.target.value);
     }
   };
 
@@ -153,6 +163,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
   const connectionStatus = getConnectionStatusMessage();
 
+  if (config.debug) {
+    console.log("[BotForge Widget] ChatWindow render:", {
+      messagesCount: messages.length,
+      inputValue,
+      isLoading,
+      isConnected,
+    });
+  }
+
   return (
     <div style={windowStyles}>
       {/* Header */}
@@ -243,6 +262,19 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             <div style={{ color: "#3b82f6", fontWeight: "bold" }}>
               Drop file here to upload
             </div>
+          </div>
+        )}
+
+        {messages.length === 0 && !isLoading && (
+          <div
+            style={{
+              textAlign: "center",
+              color: "#6b7280",
+              fontSize: "14px",
+              padding: "20px",
+            }}
+          >
+            {config.greeting || "Hello! How can I help you today?"}
           </div>
         )}
 
@@ -372,11 +404,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             ref={inputRef}
             type="text"
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={handleInputChange}
             onKeyPress={handleKeyPress}
             placeholder={config.placeholder || "Type your message..."}
             disabled={isLoading}
-            style={inputStyles}
+            style={{
+              ...inputStyles,
+              opacity: isLoading ? 0.5 : 1,
+              cursor: isLoading ? "not-allowed" : "text",
+            }}
           />
 
           {config.enableFileUpload && (

@@ -107,12 +107,24 @@ export const useBotForgeAPI = ({
       isInitialized ||
       initializationAttemptedRef.current
     ) {
+      if (debug) {
+        console.log("[BotForge Widget] Skipping initialization:", {
+          mounted: mountedRef.current,
+          hasClient: !!apiClientRef.current,
+          isInitialized,
+          attempted: initializationAttemptedRef.current,
+        });
+      }
       return null;
     }
 
     initializationAttemptedRef.current = true;
     setIsLoading(true);
     setError(null);
+
+    if (debug) {
+      console.log("[BotForge Widget] Starting conversation initialization...");
+    }
 
     try {
       const result = await apiClientRef.current.initializeConversation();
@@ -131,7 +143,18 @@ export const useBotForgeAPI = ({
         console.log("[BotForge Widget] Conversation initialized:", result);
       }
 
-      return result.welcomeMessage || null;
+      // Return the welcome message if it exists
+      if (result.welcomeMessage) {
+        if (debug) {
+          console.log(
+            "[BotForge Widget] Returning welcome message:",
+            result.welcomeMessage
+          );
+        }
+        return result.welcomeMessage;
+      }
+
+      return null;
     } catch (err) {
       if (!mountedRef.current) return null;
 
@@ -164,6 +187,10 @@ export const useBotForgeAPI = ({
         throw new Error("Conversation not initialized");
       }
 
+      if (debug) {
+        console.log("[BotForge Widget] Sending message:", content);
+      }
+
       setIsLoading(true);
       setError(null);
 
@@ -177,12 +204,12 @@ export const useBotForgeAPI = ({
         setIsConnected(!isOffline);
 
         // Notify about messages
+        if (debug) {
+          console.log("[BotForge Widget] Message exchange complete:", result);
+        }
+
         onMessage?.(result.userMessage);
         onMessage?.(result.botMessage);
-
-        if (debug) {
-          console.log("[BotForge Widget] Message sent successfully:", result);
-        }
 
         return result;
       } catch (err) {

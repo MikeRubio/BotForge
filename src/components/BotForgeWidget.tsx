@@ -93,6 +93,10 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
         }
       },
       onMessage: (message) => {
+        if (config.debug) {
+          console.log("[BotForge Widget] Adding message to UI:", message);
+        }
+
         setMessages((prev) => {
           const newMessages = [...prev, message];
           // Limit messages if maxMessages is set
@@ -129,14 +133,34 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
       if (!isInitialized && !initializationTriggeredRef.current) {
         initializationTriggeredRef.current = true;
 
-        initializeConversation().then((welcomeMessage) => {
-          if (welcomeMessage) {
-            setMessages([welcomeMessage]);
-          }
-          config.events?.onReady?.();
-        });
+        if (config.debug) {
+          console.log("[BotForge Widget] Starting initialization...");
+        }
+
+        initializeConversation()
+          .then((welcomeMessage) => {
+            if (config.debug) {
+              console.log(
+                "[BotForge Widget] Initialization complete, welcome message:",
+                welcomeMessage
+              );
+            }
+
+            if (welcomeMessage) {
+              setMessages([welcomeMessage]);
+              if (config.debug) {
+                console.log("[BotForge Widget] Welcome message added to state");
+              }
+            }
+            config.events?.onReady?.();
+          })
+          .catch((error) => {
+            if (config.debug) {
+              console.error("[BotForge Widget] Initialization failed:", error);
+            }
+          });
       }
-    }, [isInitialized, initializeConversation, config.events]);
+    }, [isInitialized, initializeConversation, config.events, config.debug]);
 
     // Handle auto-open
     useEffect(() => {
@@ -176,7 +200,19 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
       content: string,
       type: "text" | "file" = "text"
     ) => {
-      if (!content.trim() || isLoading) return;
+      if (!content.trim() || isLoading) {
+        if (config.debug) {
+          console.log("[BotForge Widget] Message send blocked:", {
+            content: content.trim(),
+            isLoading,
+          });
+        }
+        return;
+      }
+
+      if (config.debug) {
+        console.log("[BotForge Widget] Sending message:", content);
+      }
 
       try {
         await apiSendMessage(content, type);
@@ -248,6 +284,17 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
       fontFamily: config.theme?.fontFamily,
       ...config.position,
     };
+
+    if (config.debug) {
+      console.log("[BotForge Widget] Render state:", {
+        isOpen,
+        messagesCount: messages.length,
+        isLoading,
+        isConnected,
+        conversationId,
+        isInitialized,
+      });
+    }
 
     return (
       <div

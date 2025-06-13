@@ -4,13 +4,21 @@ import typescript from "@rollup/plugin-typescript";
 import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import terser from "@rollup/plugin-terser";
 import dts from "rollup-plugin-dts";
+import json from "@rollup/plugin-json";
+import nodePolyfills from "rollup-plugin-polyfill-node";
 
 import fs from "fs";
 const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
 
-const external = ["react", "react-dom", "react-dom/client"];
+const external = [
+  "react",
+  "react-dom",
+  "react-dom/client",
+  "react/jsx-runtime",
+];
 
 const plugins = [
+  nodePolyfills(),
   peerDepsExternal(),
   resolve({
     browser: true,
@@ -21,6 +29,7 @@ const plugins = [
     tsconfig: "./tsconfig.json",
     exclude: ["**/*.test.*", "**/*.stories.*"],
   }),
+  json(),
 ];
 
 export default [
@@ -58,6 +67,7 @@ export default [
         react: "React",
         "react-dom": "ReactDOM",
         "react-dom/client": "ReactDOM",
+        "react/jsx-runtime": "jsxRuntime",
       },
     },
     plugins: [...plugins, terser()],
