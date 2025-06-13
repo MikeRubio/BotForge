@@ -65,18 +65,18 @@
         margin-bottom: 8px;
         color: #4b5563;
       }
-      .config-section {
-        background: #fef3c7;
+      .setup-section {
+        background: #e0f2fe;
         padding: 20px;
         border-radius: 8px;
         margin: 20px 0;
-        border-left: 4px solid #f59e0b;
+        border-left: 4px solid #0288d1;
       }
-      .config-section h3 {
+      .setup-section h3 {
         margin-top: 0;
-        color: #92400e;
+        color: #01579b;
       }
-      .config-section code {
+      .setup-section code {
         background: #fff;
         padding: 2px 6px;
         border-radius: 4px;
@@ -93,6 +93,26 @@
         JavaScript with the UMD build.
       </p>
 
+      <div class="setup-section">
+        <h3>🚀 Easy Setup</h3>
+        <p>To use this widget with your own chatbot:</p>
+        <ol>
+          <li>
+            <strong>Get your Chatbot ID:</strong> Go to your BotForge dashboard
+            → Select your chatbot → Copy the ID
+          </li>
+          <li>
+            <strong>Replace the demo ID:</strong> Update
+            <code>chatbotId: "demo-chatbot-id"</code> with your actual chatbot
+            ID
+          </li>
+          <li>
+            <strong>That's it!</strong> The widget automatically connects to
+            BotForge's backend and uses your exact chatbot flow
+          </li>
+        </ol>
+      </div>
+
       <div class="feature-list">
         <h3>Features Demonstrated:</h3>
         <ul>
@@ -103,7 +123,9 @@
           <li>Custom theme configuration</li>
           <li>Debug mode enabled</li>
           <li>File upload support</li>
-          <li>Offline mode with fallback responses</li>
+          <li>Automatic connection to BotForge backend</li>
+          <li>Uses your exact chatbot flow from the dashboard</li>
+          <li>All conversations logged in your BotForge analytics</li>
         </ul>
       </div>
 
@@ -120,8 +142,8 @@
       <div id="status" class="status">Widget status will appear here...</div>
     </div>
 
-    <!-- Load the BotForge widget from local build -->
-    <script src="../dist/botforge-widget.umd.js"></script>
+    <!-- Load the BotForge widget from CDN -->
+    <script src="https://unpkg.com/@botforge/widget/dist/botforge-widget.umd.js"></script>
 
     <script>
       let widget = null;
@@ -132,8 +154,9 @@
           updateStatus("Initializing BotForge widget...");
 
           widget = await BotForge.initBotForge({
-            // IMPORTANT: Replace this with your actual chatbot-id
-            chatbotId: "demo-chatbot-id",
+            // Replace this with your actual chatbot ID from BotForge dashboard
+            chatbotId: "demo-chatbot-id", // ⚠️ Replace with your actual chatbot ID
+
             theme: {
               primaryColor: "#10b981",
               backgroundColor: "#ffffff",
@@ -195,14 +218,16 @@
             enableFileUpload: true,
             enableTypingIndicator: true,
             debug: true, // Enable debug logging
-            greeting:
-              "Hello! Welcome to our vanilla JS demo. How can I help you today?",
+            greeting: "Hello! Welcome to our demo. How can I help you today?",
             placeholder: "Type your message here...",
             title: "Demo Chat",
             subtitle: "Vanilla JS Integration",
           });
 
           updateStatus("✅ Widget initialized successfully!");
+          updateStatus(
+            "ℹ️ Note: Replace 'demo-chatbot-id' with your actual chatbot ID"
+          );
         } catch (error) {
           updateStatus(`❌ Failed to initialize widget: ${error.message}`);
           console.error("Widget initialization error:", error);
@@ -246,6 +271,9 @@
               "How are you doing today?",
               "Can you help me with something?",
               "What features do you support?",
+              "Tell me about your pricing",
+              "I need technical support",
+              "Thank you for your help!",
             ];
             const randomMessage =
               messages[Math.floor(Math.random() * messages.length)];
@@ -266,6 +294,7 @@
             { id: "user456", name: "Jane Smith", email: "jane@example.com" },
             { id: "user789", name: "Bob Johnson", email: "bob@example.com" },
             { id: "user123", name: "John Doe", email: "john@example.com" },
+            { id: "user999", name: "Alice Wilson", email: "alice@example.com" },
           ];
           const randomUser = users[Math.floor(Math.random() * users.length)];
 
@@ -318,6 +347,7 @@
       // Log BotForge version
       if (window.BotForge) {
         console.log("BotForge version:", window.BotForge.version);
+        updateStatus(`📦 BotForge Widget v${window.BotForge.version} loaded`);
       }
     </script>
   </body>

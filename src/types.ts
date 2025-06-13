@@ -59,8 +59,9 @@ export interface BotForgeEvents {
 }
 
 export interface BotForgeConfig {
-  chatbotId: string;
-  apiUrl?: string;
+  chatbotId: string; // Required: The chatbot ID from BotForge platform
+  apiUrl?: string; // Optional: Defaults to BotForge's backend
+  anonKey?: string; // Optional: BotForge's anon key (for better auth)
   theme?: BotForgeTheme;
   position?: BotForgePosition;
   autoOpen?: boolean;

@@ -28,6 +28,22 @@ function App() {
         application.
       </p>
 
+      <div
+        style={{
+          backgroundColor: "#e0f2fe",
+          padding: "16px",
+          borderRadius: "8px",
+          marginBottom: "20px",
+          borderLeft: "4px solid #0288d1",
+        }}
+      >
+        <h3 style={{ margin: "0 0 8px 0", color: "#01579b" }}>🚀 Easy Setup</h3>
+        <p style={{ margin: 0, color: "#01579b" }}>
+          Just replace <code>chatbotId="demo-chatbot-id"</code> below with your
+          actual chatbot ID from your BotForge dashboard. That's it!
+        </p>
+      </div>
+
       <div style={{ marginBottom: "20px" }}>
         <button onClick={handleOpenChat} style={{ marginRight: "10px" }}>
           Open Chat
@@ -43,13 +59,14 @@ function App() {
           <li>User information pre-populated</li>
           <li>Custom positioning</li>
           <li>API method calls via ref</li>
-          <li>Offline mode with fallback responses</li>
+          <li>Automatic connection to BotForge backend</li>
+          <li>Uses your exact chatbot flow from the dashboard</li>
         </ul>
       </div>
 
       <BotForgeWidget
         ref={widgetRef}
-        chatbotId="demo-chatbot-id" // ⚠️ UPDATE THIS!
+        chatbotId="demo-chatbot-id" // Replace with your actual chatbot ID
         theme={{
           primaryColor: "#8b5cf6",
           backgroundColor: "#ffffff",

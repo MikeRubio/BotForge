@@ -24,7 +24,7 @@ function App() {
     <div>
       <h1>My Website</h1>
       <BotForgeWidget
-        chatbotId="your-chatbot-id"
+        chatbotId="your-chatbot-id" // Get this from your BotForge dashboard
         theme={{
           primaryColor: "#3b82f6",
           borderRadius: "12px",
@@ -60,7 +60,7 @@ export default App;
     <script src="https://unpkg.com/@botforge/widget/dist/botforge-widget.umd.js"></script>
     <script>
       const widget = BotForge.initBotForge({
-        chatbotId: "your-chatbot-id",
+        chatbotId: "your-chatbot-id", // Get this from your BotForge dashboard
         theme: {
           primaryColor: "#3b82f6",
           borderRadius: "12px",
@@ -103,7 +103,7 @@ export default {
   },
   data() {
     return {
-      chatbotId: "your-chatbot-id",
+      chatbotId: "your-chatbot-id", // Get this from your BotForge dashboard
       theme: {
         primaryColor: "#3b82f6",
         borderRadius: "12px",
@@ -140,7 +140,7 @@ export class AppComponent implements OnInit {
     const { initBotForge } = await import("@botforge/widget");
 
     initBotForge({
-      chatbotId: "your-chatbot-id",
+      chatbotId: "your-chatbot-id", // Get this from your BotForge dashboard
       theme: {
         primaryColor: "#3b82f6",
         borderRadius: "12px",
@@ -157,6 +157,20 @@ export class AppComponent implements OnInit {
   }
 }
 ```
+
+## ⚙️ Setup Instructions
+
+### 1. Get Your Chatbot ID
+
+1. Log into your [BotForge Dashboard](https://botforge.site/dashboard)
+2. Go to your chatbot settings
+3. Copy the **Chatbot ID** from the integration section
+
+### 2. Add the Widget
+
+Replace `"your-chatbot-id"` in the examples above with your actual chatbot ID.
+
+**That's it!** The widget automatically connects to BotForge's backend and uses the exact chatbot flow you created in the dashboard.
 
 ## 📖 Configuration
 
@@ -206,29 +220,16 @@ interface BotForgeConfig {
 }
 ```
 
-## ⚙️ Setup Instructions
-
-### 1. Get Your Chatbot ID
-
-1. Log into your BotForge dashboard
-2. Go to your chatbot settings
-3. Copy the **Chatbot ID** from the integration section
-
-### 2. Configure the Widget
-
-Replace the placeholder values in the examples above:
-
-- `chatbotId: "your-chatbot-id"` → Your actual chatbot ID
-
 ## 🌟 Features
 
+✅ **Plug & Play** - Just provide your chatbot ID and it works  
+✅ **Your Exact Flow** - Uses the same conversation flow you built in BotForge  
+✅ **Full Logging** - All conversations are logged in your BotForge dashboard  
 ✅ **Framework Agnostic** - Works with React, Vue, Angular, and vanilla JavaScript  
 ✅ **TypeScript Support** - Built-in TypeScript definitions  
 ✅ **Responsive Design** - Optimized for all screen sizes  
 ✅ **Customizable Themes** - Complete control over appearance  
 ✅ **Event System** - Comprehensive event callbacks  
-✅ **File Upload Support** - Optional file upload functionality  
-✅ **Offline Fallback** - Graceful degradation when API is unavailable  
 ✅ **Production Ready** - Optimized bundle size and performance  
 ✅ **Accessibility** - WCAG compliant with keyboard navigation  
 ✅ **CDN Ready** - Available via unpkg and jsDelivr
@@ -342,6 +343,7 @@ widget.updateConfig({
 ## 🔒 Security
 
 - All API communications use HTTPS
+- Connects to BotForge's secure backend
 - No sensitive data is stored in localStorage
 - CORS-compliant requests
 - XSS protection built-in
@@ -352,14 +354,15 @@ widget.updateConfig({
 
 **Widget not appearing:**
 
-- Verify your `chatbotId` is correct
+- Verify your `chatbotId` is correct (check your BotForge dashboard)
 - Check browser console for errors
 - Ensure the widget container has proper z-index
 
-**API connection failed:**
+**Chatbot not responding correctly:**
 
-- Check your network connection
-- The widget will work in offline mode with fallback responses
+- Check your chatbot flow in the BotForge dashboard
+- Ensure your chatbot is published
+- Verify the conversation flow logic
 
 **Styling conflicts:**
 

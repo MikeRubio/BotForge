@@ -3,12 +3,13 @@ import {
   BotForgeAPIClient,
   generateUserIdentifier,
   createFallbackResponse,
-  API_URL,
 } from "../utils/api";
 import { BotForgeMessage, BotForgeUser } from "../types";
 
 interface UseBotForgeAPIProps {
   chatbotId: string;
+  apiUrl?: string;
+  anonKey?: string;
   user?: BotForgeUser;
   debug?: boolean;
   onError?: (error: Error) => void;
@@ -18,6 +19,8 @@ interface UseBotForgeAPIProps {
 
 export const useBotForgeAPI = ({
   chatbotId,
+  apiUrl,
+  anonKey,
   user,
   debug = false,
   onError,
@@ -49,7 +52,12 @@ export const useBotForgeAPI = ({
   useEffect(() => {
     if (!mountedRef.current) return;
 
-    apiClientRef.current = new BotForgeAPIClient(chatbotId, API_URL, debug);
+    apiClientRef.current = new BotForgeAPIClient(
+      chatbotId,
+      apiUrl,
+      anonKey,
+      debug
+    );
 
     // Set user identifier
     const identifier = user?.id || generateUserIdentifier();
@@ -61,7 +69,7 @@ export const useBotForgeAPI = ({
         apiClientRef.current.destroy();
       }
     };
-  }, [chatbotId, API_URL, debug, user?.id]);
+  }, [chatbotId, apiUrl, anonKey, debug, user?.id]);
 
   // Monitor connection status
   useEffect(() => {
@@ -86,7 +94,7 @@ export const useBotForgeAPI = ({
       }
     };
 
-    const interval = setInterval(checkConnection, 5000); // Check every 5 seconds
+    const interval = setInterval(checkConnection, 5000);
 
     return () => clearInterval(interval);
   }, [isConnected, debug, onConnectionChange]);

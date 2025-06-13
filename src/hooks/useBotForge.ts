@@ -1,5 +1,5 @@
-import { useRef, useCallback } from 'react';
-import { BotForgeAPI, BotForgeConfig } from '../types';
+import { useRef, useCallback } from "react";
+import { BotForgeAPI, BotForgeConfig } from "../types";
 
 export const useBotForge = (config: BotForgeConfig) => {
   const widgetRef = useRef<BotForgeAPI>(null);

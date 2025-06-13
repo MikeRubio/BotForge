@@ -1,45 +1,33 @@
 import { BotForgeMessage, APIResponse, BotForgeUser } from "../types";
 
-export const API_URL = "https://shelxkuuslyxfbiaargz.supabase.co";
-
 export class BotForgeAPIClient {
   private baseUrl: string;
+  private anonKey: string | null;
   private chatbotId: string;
   private conversationId: string | null = null;
   private userIdentifier: string | null = null;
   private debug: boolean = false;
   private isInitializing: boolean = false;
   private retryCount: number = 0;
-  private maxRetries: number = 2; // Reduced retries
+  private maxRetries: number = 2;
   private isOfflineMode: boolean = false;
   private connectionCheckInterval: NodeJS.Timeout | null = null;
 
   constructor(
     chatbotId: string,
-    apiUrl: string = API_URL,
+    apiUrl?: string,
+    anonKey?: string,
     debug: boolean = false
   ) {
     this.chatbotId = chatbotId;
 
-    // If no apiUrl provided, try to detect from environment or use fallback
-    if (!apiUrl) {
-      // Try to get from window environment variables (if available)
-      if (typeof window !== "undefined" && (window as any).VITE_SUPABASE_URL) {
-        this.baseUrl = (window as any).VITE_SUPABASE_URL;
-      } else {
-        // Fallback to default (this should be overridden by the user)
-        this.baseUrl = API_URL;
-        if (debug) {
-          console.warn(
-            "[BotForge Widget] No API URL provided. Please set the apiUrl parameter to your Supabase project URL."
-          );
-        }
-      }
-    } else {
-      this.baseUrl = apiUrl;
-    }
-
-    this.baseUrl = this.baseUrl.replace(/\/$/, ""); // Remove trailing slash
+    // Default to BotForge's production backend
+    this.baseUrl = (
+      apiUrl || "https://zp1v56uxy8rdx5ypatb0ockcb9tr6a.supabase.co"
+    ).replace(/\/$/, "");
+    this.anonKey =
+      anonKey ||
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwMXY1NnV4eThydng1eXBhdGIwb2NrY2I5dHI2YSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzM2NzI5NzE5LCJleHAiOjIwNTIzMDU3MTl9.Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8"; // BotForge's anon key
     this.debug = debug;
 
     if (debug) {
@@ -72,15 +60,16 @@ export class BotForgeAPIClient {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
+          Authorization: `Bearer ${this.anonKey}`,
         },
         body: JSON.stringify({
           chatbotId: this.chatbotId,
           action: "get_flow",
         }),
-        signal: AbortSignal.timeout(5000), // 5 second timeout
+        signal: AbortSignal.timeout(5000),
       });
 
-      if (response.ok) {
+      if (response.ok || response.status === 401) {
         this.isOfflineMode = false;
         this.log("Connection restored");
         return true;
@@ -117,14 +106,21 @@ export class BotForgeAPIClient {
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      };
+
+      // Add authorization header
+      if (this.anonKey) {
+        headers["Authorization"] = `Bearer ${this.anonKey}`;
+      }
 
       const response = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
+        headers,
         body: JSON.stringify(data),
         signal: controller.signal,
       });
@@ -214,10 +210,8 @@ export class BotForgeAPIClient {
     // Prevent multiple simultaneous initialization attempts
     if (this.isInitializing) {
       this.log("Initialization already in progress, waiting...");
-      // Wait for current initialization to complete
       let attempts = 0;
       while (this.isInitializing && attempts < 50) {
-        // Max 5 seconds wait
         await new Promise((resolve) => setTimeout(resolve, 100));
         attempts++;
       }

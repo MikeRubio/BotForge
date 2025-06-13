@@ -11,7 +11,8 @@ import { BotForgeConfig, BotForgeMessage, BotForgeAPI } from "../types";
 import { useBotForgeAPI } from "../hooks/useBotForgeAPI";
 
 const defaultConfig: Partial<BotForgeConfig> = {
-  // Remove the default apiUrl - let users specify their Supabase URL
+  // Default to BotForge's production backend
+  apiUrl: "https://zp1v56uxy8rdx5ypatb0ockcb9tr6a.supabase.co",
   theme: {
     primaryColor: "#3B82F6",
     backgroundColor: "#ffffff",
@@ -81,6 +82,8 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
       resetConversation,
     } = useBotForgeAPI({
       chatbotId: config.chatbotId,
+      apiUrl: config.apiUrl,
+      anonKey: config.anonKey,
       user: config.user,
       debug: config.debug,
       onError: (error) => {
