@@ -1,17 +1,19 @@
 # @botforge/widget
 
 The official BotForge widget for easy integration into any website or web application.
-To get you **your-chatbot-id** visit [APP](https://botforge.site/#pricing)
 
-## Installation
+[![npm version](https://badge.fury.io/js/@botforge%2Fwidget.svg)](https://badge.fury.io/js/@botforge%2Fwidget)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## 🚀 Quick Start
+
+### Installation
 
 ```bash
 npm install @botforge/widget
 ```
 
-## Quick Start
-
-### React
+### React Integration
 
 ```jsx
 import React from "react";
@@ -54,6 +56,7 @@ export default App;
   <body>
     <h1>My Website</h1>
 
+    <!-- Load from CDN -->
     <script src="https://unpkg.com/@botforge/widget/dist/botforge-widget.umd.js"></script>
     <script>
       const widget = BotForge.initBotForge({
@@ -76,7 +79,7 @@ export default App;
 </html>
 ```
 
-### Vue.js
+### Vue.js Integration
 
 ```vue
 <template>
@@ -119,11 +122,11 @@ export default {
 </script>
 ```
 
-### Angular
+### Angular Integration
 
 ```typescript
 // app.component.ts
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 
 @Component({
   selector: "app-root",
@@ -132,50 +135,85 @@ import { Component } from "@angular/core";
     <div id="botforge-widget"></div>
   `,
 })
-export class AppComponent {
-  ngOnInit() {
-    import("@botforge/widget").then(({ initBotForge }) => {
-      initBotForge({
-        chatbotId: "your-chatbot-id",
-        theme: {
-          primaryColor: "#3b82f6",
-          borderRadius: "12px",
-        },
-        position: {
-          bottom: "20px",
-          right: "20px",
-        },
-        events: {
-          onOpen: () => console.log("Chat opened"),
-          onMessage: (message) => console.log("New message:", message),
-        },
-      });
+export class AppComponent implements OnInit {
+  async ngOnInit() {
+    const { initBotForge } = await import("@botforge/widget");
+
+    initBotForge({
+      chatbotId: "your-chatbot-id",
+      theme: {
+        primaryColor: "#3b82f6",
+        borderRadius: "12px",
+      },
+      position: {
+        bottom: "20px",
+        right: "20px",
+      },
+      events: {
+        onOpen: () => console.log("Chat opened"),
+        onMessage: (message) => console.log("New message:", message),
+      },
     });
   }
 }
 ```
 
-## Configuration
+## 📖 Configuration
 
-### Required Props
+### Required Configuration
 
-- `chatbotId` (string): Your BotForge chatbot ID
+```typescript
+interface BotForgeConfig {
+  chatbotId: string; // Your BotForge chatbot ID (required)
+}
+```
 
-### Optional Props
+### Optional Configuration
 
-- `apiUrl` (string): Custom API URL (defaults to 'https://botforge.site')
-- `theme` (BotForgeTheme): Customize the appearance
-- `position` (BotForgePosition): Position the widget on the page
-- `autoOpen` (boolean): Automatically open the chat on load
-- `showBranding` (boolean): Show "Powered by BotForge" (defaults to true)
-- `user` (BotForgeUser): Pre-populate user information
-- `events` (BotForgeEvents): Event callbacks
+```typescript
+interface BotForgeConfig {
+  // API Configuration
+  apiUrl?: string; // Custom API URL (default: 'https://api.botforge.site')
 
-### Theme Options
+  // Appearance
+  theme?: BotForgeTheme;
+  position?: BotForgePosition;
+
+  // Behavior
+  autoOpen?: boolean; // Auto-open chat on load (default: false)
+  showBranding?: boolean; // Show "Powered by BotForge" (default: true)
+
+  // User Information
+  user?: BotForgeUser;
+
+  // Event Handlers
+  events?: BotForgeEvents;
+
+  // Features
+  enableFileUpload?: boolean; // Enable file uploads (default: false)
+  enableEmoji?: boolean; // Enable emoji picker (default: true)
+  enableTypingIndicator?: boolean; // Show typing indicator (default: true)
+
+  // Limits
+  maxMessages?: number; // Max messages to keep in memory (default: 100)
+
+  // Text Content
+  greeting?: string; // Welcome message
+  placeholder?: string; // Input placeholder
+  title?: string; // Chat window title
+  subtitle?: string; // Chat window subtitle
+
+  // Advanced
+  language?: string; // Language code (default: 'en')
+  debug?: boolean; // Enable debug logging (default: false)
+}
+```
+
+### Theme Customization
 
 ```typescript
 interface BotForgeTheme {
-  primaryColor?: string; // Main color (default: '#3b82f6')
+  primaryColor?: string; // Main brand color (default: '#3B82F6')
   backgroundColor?: string; // Chat background (default: '#ffffff')
   textColor?: string; // Text color (default: '#1f2937')
   borderRadius?: string; // Border radius (default: '12px')
@@ -183,6 +221,9 @@ interface BotForgeTheme {
   buttonSize?: "small" | "medium" | "large"; // Chat button size
   chatHeight?: string; // Chat window height (default: '500px')
   chatWidth?: string; // Chat window width (default: '380px')
+  headerColor?: string; // Header background color
+  userMessageColor?: string; // User message bubble color
+  botMessageColor?: string; // Bot message bubble color
 }
 ```
 
@@ -197,23 +238,25 @@ interface BotForgePosition {
 }
 ```
 
-### Events
+### Event Handlers
 
 ```typescript
 interface BotForgeEvents {
-  onOpen?: () => void; // Chat opened
-  onClose?: () => void; // Chat closed
-  onMessage?: (message: BotForgeMessage) => void; // Any message
-  onUserMessage?: (message: BotForgeMessage) => void; // User message
-  onBotMessage?: (message: BotForgeMessage) => void; // Bot message
+  onOpen?: () => void; // Chat window opened
+  onClose?: () => void; // Chat window closed
+  onMessage?: (message: BotForgeMessage) => void; // Any message sent/received
+  onUserMessage?: (message: BotForgeMessage) => void; // User sent a message
+  onBotMessage?: (message: BotForgeMessage) => void; // Bot sent a message
   onError?: (error: Error) => void; // Error occurred
-  onReady?: () => void; // Widget ready
+  onReady?: () => void; // Widget is ready
+  onTyping?: () => void; // Bot is typing
+  onStopTyping?: () => void; // Bot stopped typing
 }
 ```
 
-## API Methods
+## 🎛️ API Methods
 
-When using React, you can access the widget API using a ref:
+When using React, access the widget API using a ref:
 
 ```jsx
 import React, { useRef } from "react";
@@ -243,81 +286,153 @@ function App() {
 
 ### Available Methods
 
-- `open()`: Open the chat window
-- `close()`: Close the chat window
-- `toggle()`: Toggle the chat window
-- `sendMessage(message: string)`: Send a message programmatically
-- `setUser(user: BotForgeUser)`: Update user information
-- `isOpen()`: Check if chat is open
-- `destroy()`: Remove the widget completely
-
-## Advanced Usage
-
-### Custom Styling
-
-You can override the default styles using CSS:
-
-```css
-/* Custom button styles */
-#botforge-widget #chat-button {
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4) !important;
-}
-
-/* Custom chat window styles */
-#botforge-widget #chat-window {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+```typescript
+interface BotForgeAPI {
+  open(): void; // Open the chat window
+  close(): void; // Close the chat window
+  toggle(): void; // Toggle the chat window
+  sendMessage(message: string): Promise<void>; // Send a message programmatically
+  setUser(user: BotForgeUser): void; // Update user information
+  isOpen(): boolean; // Check if chat is open
+  destroy(): void; // Remove the widget completely
+  updateConfig(config: Partial<BotForgeConfig>): void; // Update configuration
 }
 ```
 
-### Multiple Widgets
+## 🌟 Features
 
-You can have multiple widgets on the same page:
+✅ **Framework Agnostic** - Works with React, Vue, Angular, and vanilla JavaScript  
+✅ **TypeScript Support** - Built-in TypeScript definitions  
+✅ **Responsive Design** - Optimized for all screen sizes  
+✅ **Customizable Themes** - Complete control over appearance  
+✅ **Event System** - Comprehensive event callbacks  
+✅ **File Upload Support** - Optional file upload functionality  
+✅ **Offline Fallback** - Graceful degradation when API is unavailable  
+✅ **Production Ready** - Optimized bundle size and performance  
+✅ **Accessibility** - WCAG compliant with keyboard navigation  
+✅ **CDN Ready** - Available via unpkg and jsDelivr
 
-```jsx
-<BotForgeWidget
-  chatbotId="support-bot"
-  position={{ bottom: '20px', right: '20px' }}
-  theme={{ primaryColor: '#3b82f6' }}
-/>
+## 🔧 Advanced Usage
 
-<BotForgeWidget
-  chatbotId="sales-bot"
-  position={{ bottom: '20px', left: '20px' }}
-  theme={{ primaryColor: '#10b981' }}
-/>
+### Custom User Information
+
+```javascript
+const widget = BotForge.initBotForge({
+  chatbotId: "your-chatbot-id",
+  user: {
+    id: "user123",
+    name: "John Doe",
+    email: "john@example.com",
+    avatar: "https://example.com/avatar.jpg",
+    metadata: {
+      plan: "premium",
+      signupDate: "2024-01-01",
+    },
+  },
+});
 ```
 
-### Conditional Rendering
+### Error Handling
 
-```jsx
-function App() {
-  const [showWidget, setShowWidget] = useState(false);
-
-  useEffect(() => {
-    // Show widget after user has been on page for 10 seconds
-    const timer = setTimeout(() => setShowWidget(true), 10000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  return (
-    <div>
-      <h1>My Website</h1>
-      {showWidget && (
-        <BotForgeWidget chatbotId="your-chatbot-id" autoOpen={true} />
-      )}
-    </div>
-  );
-}
+```javascript
+const widget = BotForge.initBotForge({
+  chatbotId: "your-chatbot-id",
+  events: {
+    onError: (error) => {
+      console.error("Widget error:", error);
+      // Handle error (e.g., show notification)
+    },
+    onReady: () => {
+      console.log("Widget is ready!");
+    },
+  },
+  debug: true, // Enable debug logging
+});
 ```
 
-## TypeScript Support
+### Dynamic Configuration Updates
 
-This package includes TypeScript definitions out of the box. No additional setup required!
+```javascript
+// Update user information
+widget.setUser({
+  id: "user456",
+  name: "Jane Smith",
+});
 
-## License
+// Update configuration
+widget.updateConfig({
+  theme: {
+    primaryColor: "#10b981",
+  },
+});
+```
 
-MIT
+## 🌐 Browser Support
 
-## Support
+- Chrome 60+
+- Firefox 60+
+- Safari 12+
+- Edge 79+
 
-For support, email support@botforge.site or visit our [documentation](https://botforge.site/docs).
+## 📦 Bundle Size
+
+- ES Module: ~45KB (gzipped)
+- UMD Bundle: ~50KB (gzipped)
+- Zero dependencies (React is a peer dependency)
+
+## 🔒 Security
+
+- All API communications use HTTPS
+- No sensitive data is stored in localStorage
+- CORS-compliant requests
+- XSS protection built-in
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Widget not appearing:**
+
+- Verify your `chatbotId` is correct
+- Check browser console for errors
+- Ensure the widget container has proper z-index
+
+**API connection failed:**
+
+- Check your network connection
+- Verify the `apiUrl` if using a custom endpoint
+- The widget will work in offline mode with fallback responses
+
+**Styling conflicts:**
+
+- Use CSS specificity or `!important` to override widget styles
+- Check for conflicting CSS frameworks
+
+### Debug Mode
+
+Enable debug mode to see detailed logging:
+
+```javascript
+BotForge.initBotForge({
+  chatbotId: "your-chatbot-id",
+  debug: true,
+});
+```
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+- 📧 Email: support@botforge.site
+- 📖 Documentation: https://botforge.site/docs
+- 🐛 Issues: https://github.com/botforge/widget/issues
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+---
+
+Made with ❤️ by the [BotForge](https://botforge.site) team.

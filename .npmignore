@@ -10,3 +10,9 @@ coverage/
 .DS_Store
 *.tgz
 *.tar.gz
+examples/
+.env*
+.vscode/
+.idea/
+*.test.*
+*.stories.*

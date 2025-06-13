@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BotForge Widget - Vanilla JS Example</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f9fafb;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+      .controls {
+        margin-bottom: 30px;
+      }
+      button {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+      button:hover {
+        background: #2563eb;
+      }
+      .status {
+        margin-top: 20px;
+        padding: 15px;
+        background: #f3f4f6;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 14px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      .feature-list {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+      .feature-list h3 {
+        margin-top: 0;
+        color: #1f2937;
+      }
+      .feature-list ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+      .feature-list li {
+        margin-bottom: 8px;
+        color: #4b5563;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>BotForge Widget - Vanilla JavaScript Example</h1>
+      <p>
+        This example shows how to integrate the BotForge widget using vanilla
+        JavaScript with the UMD build.
+      </p>
+
+      <div class="feature-list">
+        <h3>Features Demonstrated:</h3>
+        <ul>
+          <li>UMD build integration via CDN</li>
+          <li>Complete API control (open, close, send messages)</li>
+          <li>Event handling and status updates</li>
+          <li>User management</li>
+          <li>Custom theme configuration</li>
+          <li>Debug mode enabled</li>
+          <li>File upload support</li>
+        </ul>
+      </div>
+
+      <div class="controls">
+        <button onclick="openChat()">Open Chat</button>
+        <button onclick="closeChat()">Close Chat</button>
+        <button onclick="toggleChat()">Toggle Chat</button>
+        <button onclick="sendMessage()">Send Test Message</button>
+        <button onclick="updateUser()">Update User</button>
+        <button onclick="checkStatus()">Check Status</button>
+        <button onclick="clearStatus()">Clear Status</button>
+      </div>
+
+      <div id="status" class="status">Widget status will appear here...</div>
+    </div>
+
+    <!-- Load the BotForge widget from local build -->
+    <script src="../dist/botforge-widget.umd.js"></script>
+
+    <script>
+      let widget = null;
+
+      // Initialize the widget when page loads
+      document.addEventListener("DOMContentLoaded", async function () {
+        try {
+          updateStatus("Initializing BotForge widget...");
+
+          widget = await BotForge.initBotForge({
+            chatbotId: "demo-chatbot-id",
+            apiUrl: "https://api.botforge.site", // You can change this to your API URL
+            theme: {
+              primaryColor: "#10b981",
+              backgroundColor: "#ffffff",
+              borderRadius: "16px",
+              buttonSize: "medium",
+              chatHeight: "600px",
+              chatWidth: "400px",
+              fontFamily:
+                '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            },
+            position: {
+              bottom: "20px",
+              right: "20px",
+            },
+            user: {
+              id: "user123",
+              name: "John Doe",
+              email: "john@example.com",
+              metadata: {
+                source: "vanilla-example",
+                timestamp: new Date().toISOString(),
+              },
+            },
+            events: {
+              onOpen: () => {
+                updateStatus("✅ Chat opened");
+              },
+              onClose: () => {
+                updateStatus("❌ Chat closed");
+              },
+              onMessage: (message) => {
+                updateStatus(
+                  `💬 New message from ${
+                    message.sender
+                  }: ${message.content.substring(0, 50)}${
+                    message.content.length > 50 ? "..." : ""
+                  }`
+                );
+              },
+              onUserMessage: (message) => {
+                updateStatus(`👤 User sent: ${message.content}`);
+              },
+              onBotMessage: (message) => {
+                updateStatus(
+                  `🤖 Bot replied: ${message.content.substring(0, 50)}${
+                    message.content.length > 50 ? "..." : ""
+                  }`
+                );
+              },
+              onReady: () => {
+                updateStatus("🚀 Widget ready and initialized!");
+              },
+              onError: (error) => {
+                updateStatus(`❌ Error: ${error.message}`);
+              },
+            },
+            autoOpen: false,
+            showBranding: true,
+            enableFileUpload: true,
+            enableTypingIndicator: true,
+            debug: true, // Enable debug logging
+            greeting:
+              "Hello! Welcome to our vanilla JS demo. How can I help you today?",
+            placeholder: "Type your message here...",
+            title: "Demo Chat",
+            subtitle: "Vanilla JS Integration",
+          });
+
+          updateStatus("✅ Widget initialized successfully!");
+        } catch (error) {
+          updateStatus(`❌ Failed to initialize widget: ${error.message}`);
+          console.error("Widget initialization error:", error);
+        }
+      });
+
+      // Control functions
+      function openChat() {
+        if (widget) {
+          widget.open();
+          updateStatus("📖 Opening chat...");
+        } else {
+          updateStatus("❌ Widget not initialized");
+        }
+      }
+
+      function closeChat() {
+        if (widget) {
+          widget.close();
+          updateStatus("📕 Closing chat...");
+        } else {
+          updateStatus("❌ Widget not initialized");
+        }
+      }
+
+      function toggleChat() {
+        if (widget) {
+          widget.toggle();
+          updateStatus("🔄 Toggling chat...");
+        } else {
+          updateStatus("❌ Widget not initialized");
+        }
+      }
+
+      async function sendMessage() {
+        if (widget) {
+          try {
+            const messages = [
+              "Hello from vanilla JavaScript!",
+              "This is a test message",
+              "How are you doing today?",
+              "Can you help me with something?",
+              "What features do you support?",
+            ];
+            const randomMessage =
+              messages[Math.floor(Math.random() * messages.length)];
+
+            await widget.sendMessage(randomMessage);
+            updateStatus(`📤 Sent message: ${randomMessage}`);
+          } catch (error) {
+            updateStatus(`❌ Failed to send message: ${error.message}`);
+          }
+        } else {
+          updateStatus("❌ Widget not initialized");
+        }
+      }
+
+      function updateUser() {
+        if (widget) {
+          const users = [
+            { id: "user456", name: "Jane Smith", email: "jane@example.com" },
+            { id: "user789", name: "Bob Johnson", email: "bob@example.com" },
+            { id: "user123", name: "John Doe", email: "john@example.com" },
+          ];
+          const randomUser = users[Math.floor(Math.random() * users.length)];
+
+          widget.setUser(randomUser);
+          updateStatus(
+            `👤 Updated user to: ${randomUser.name} (${randomUser.email})`
+          );
+        } else {
+          updateStatus("❌ Widget not initialized");
+        }
+      }
+
+      function checkStatus() {
+        if (widget) {
+          const isOpen = widget.isOpen();
+          updateStatus(`📊 Chat is currently ${isOpen ? "OPEN" : "CLOSED"}`);
+        } else {
+          updateStatus("❌ Widget not initialized");
+        }
+      }
+
+      function clearStatus() {
+        document.getElementById("status").innerHTML = "Status cleared...";
+      }
+
+      function updateStatus(message) {
+        const statusEl = document.getElementById("status");
+        const timestamp = new Date().toLocaleTimeString();
+        const newEntry = `[${timestamp}] ${message}`;
+
+        // Add new entry to the top
+        const currentContent = statusEl.innerHTML;
+        statusEl.innerHTML =
+          newEntry + (currentContent ? "<br>" + currentContent : "");
+
+        // Limit to last 20 entries
+        const entries = statusEl.innerHTML.split("<br>");
+        if (entries.length > 20) {
+          statusEl.innerHTML = entries.slice(0, 20).join("<br>");
+        }
+      }
+
+      // Global error handler
+      window.addEventListener("error", function (event) {
+        updateStatus(
+          `🚨 Global error: ${event.error?.message || event.message}`
+        );
+      });
+
+      // Log BotForge version
+      if (window.BotForge) {
+        console.log("BotForge version:", window.BotForge.version);
+      }
+    </script>
+  </body>
+</html>

@@ -1,157 +1,253 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { AnimatePresence } from "framer-motion";
-import { BotForgeConfig, BotForgeMessage, BotForgeAPI } from "../types";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
 import { ChatWindow } from "./ChatWindow";
 import { ChatButton } from "./ChatButton";
+import { BotForgeConfig, BotForgeMessage, BotForgeAPI } from "../types";
 import { useBotForgeAPI } from "../hooks/useBotForgeAPI";
 
-interface BotForgeWidgetProps extends BotForgeConfig {
+const defaultConfig: Partial<BotForgeConfig> = {
+  apiUrl: "https://api.botforge.site",
+  theme: {
+    primaryColor: "#3B82F6",
+    backgroundColor: "#ffffff",
+    textColor: "#1f2937",
+    borderRadius: "12px",
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    buttonSize: "medium",
+    chatHeight: "500px",
+    chatWidth: "380px",
+    headerColor: "#3B82F6",
+    userMessageColor: "#3B82F6",
+    botMessageColor: "#f3f4f6",
+  },
+  position: {
+    bottom: "20px",
+    right: "20px",
+  },
+  autoOpen: false,
+  showBranding: true,
+  enableFileUpload: false,
+  enableEmoji: true,
+  enableTypingIndicator: true,
+  maxMessages: 100,
+  greeting: "Hello! How can I help you today?",
+  placeholder: "Type your message...",
+  title: "Chat with us",
+  subtitle: "We're here to help",
+  language: "en",
+  debug: false,
+};
+
+export interface BotForgeWidgetProps extends BotForgeConfig {
   className?: string;
   style?: React.CSSProperties;
 }
 
-export const BotForgeWidget = React.forwardRef<
-  BotForgeAPI,
-  BotForgeWidgetProps
->((props, ref) => {
-  const {
-    chatbotId,
-    apiUrl = "https://botforge.site",
-    theme = {},
-    position = { bottom: "20px", right: "20px" },
-    autoOpen = false,
-    showBranding = true,
-    user,
-    events,
-    className,
-    style,
-  } = props;
+export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
+  (props, ref) => {
+    const config = { ...defaultConfig, ...props };
+    const [isOpen, setIsOpen] = useState(config.autoOpen || false);
+    const [messages, setMessages] = useState<BotForgeMessage[]>([]);
+    const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
+    const widgetRef = useRef<HTMLDivElement>(null);
 
-  const [isOpen, setIsOpen] = useState(autoOpen);
-  const [messages, setMessages] = useState<BotForgeMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const api = useBotForgeAPI({
-    chatbotId,
-    apiUrl,
-    user,
-    onMessage: (message) => {
-      setMessages((prev) => [...prev, message]);
-      events?.onMessage?.(message);
-      if (message.sender === "user") {
-        events?.onUserMessage?.(message);
-      } else {
-        events?.onBotMessage?.(message);
-      }
-    },
-    onError: events?.onError,
-  });
-
-  // Expose API methods via ref
-  React.useImperativeHandle(
-    ref,
-    () => ({
-      open: () => {
-        setIsOpen(true);
-        events?.onOpen?.();
+    const {
+      isConnected,
+      isLoading,
+      conversationId,
+      userIdentifier,
+      error,
+      isInitialized,
+      initializeConversation,
+      sendMessage: apiSendMessage,
+      updateUser,
+      resetConversation,
+    } = useBotForgeAPI({
+      chatbotId: config.chatbotId,
+      apiUrl: config.apiUrl,
+      user: config.user,
+      debug: config.debug,
+      onError: (error) => {
+        config.events?.onError?.(error);
+        if (config.debug) {
+          console.error("[BotForge Widget] Error:", error);
+        }
       },
-      close: () => {
-        setIsOpen(false);
-        events?.onClose?.();
-      },
-      toggle: () => {
-        setIsOpen((prev) => {
-          const newState = !prev;
-          if (newState) {
-            events?.onOpen?.();
-          } else {
-            events?.onClose?.();
+      onMessage: (message) => {
+        setMessages((prev) => {
+          const newMessages = [...prev, message];
+          // Limit messages if maxMessages is set
+          if (config.maxMessages && newMessages.length > config.maxMessages) {
+            return newMessages.slice(-config.maxMessages);
           }
-          return newState;
+          return newMessages;
         });
-      },
-      sendMessage: api.sendMessage,
-      setUser: api.setUser,
-      destroy: () => {
-        setIsOpen(false);
-        setMessages([]);
-      },
-      isOpen: () => isOpen,
-    }),
-    [isOpen, api, events]
-  );
 
-  const handleToggle = useCallback(() => {
-    setIsOpen((prev) => {
-      const newState = !prev;
-      if (newState) {
-        events?.onOpen?.();
-      } else {
-        events?.onClose?.();
-      }
-      return newState;
+        // Mark as unread if chat is closed and it's a bot message
+        if (!isOpen && message.sender === "bot") {
+          setHasUnreadMessages(true);
+        }
+
+        // Trigger events
+        config.events?.onMessage?.(message);
+        if (message.sender === "user") {
+          config.events?.onUserMessage?.(message);
+        } else {
+          config.events?.onBotMessage?.(message);
+        }
+      },
     });
-  }, [events]);
 
-  const handleSendMessage = useCallback(
-    async (content: string) => {
-      setIsLoading(true);
-      try {
-        await api.sendMessage(content);
-      } catch (error) {
-        console.error("Failed to send message:", error);
-        events?.onError?.(error as Error);
-      } finally {
-        setIsLoading(false);
+    // Initialize conversation on mount
+    useEffect(() => {
+      if (!isInitialized) {
+        initializeConversation().then((welcomeMessage) => {
+          if (welcomeMessage) {
+            setMessages([welcomeMessage]);
+          }
+          config.events?.onReady?.();
+        });
       }
-    },
-    [api, events]
-  );
+    }, [isInitialized, initializeConversation, config.events]);
 
-  useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      // Initialize conversation
-      api.initializeConversation();
-    }
-  }, [isOpen, messages.length, api]);
+    // Handle auto-open
+    useEffect(() => {
+      if (config.autoOpen && !isOpen) {
+        setIsOpen(true);
+        config.events?.onOpen?.();
+      }
+    }, [config.autoOpen, isOpen, config.events]);
 
-  useEffect(() => {
-    events?.onReady?.();
-  }, [events]);
+    // Clear unread messages when chat is opened
+    useEffect(() => {
+      if (isOpen && hasUnreadMessages) {
+        setHasUnreadMessages(false);
+      }
+    }, [isOpen, hasUnreadMessages]);
 
-  const containerStyle: React.CSSProperties = {
-    position: "fixed",
-    zIndex: 9999,
-    fontFamily:
-      theme.fontFamily ||
-      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    ...position,
-    ...style,
-  };
+    const handleToggle = () => {
+      const newIsOpen = !isOpen;
+      setIsOpen(newIsOpen);
 
-  return (
-    <div ref={containerRef} className={className} style={containerStyle}>
-      <AnimatePresence>
+      if (newIsOpen) {
+        config.events?.onOpen?.();
+        setHasUnreadMessages(false);
+      } else {
+        config.events?.onClose?.();
+      }
+    };
+
+    const handleSendMessage = async (
+      content: string,
+      type: "text" | "file" = "text"
+    ) => {
+      if (!content.trim() || isLoading) return;
+
+      try {
+        await apiSendMessage(content, type);
+      } catch (error) {
+        if (config.debug) {
+          console.error("[BotForge Widget] Failed to send message:", error);
+        }
+      }
+    };
+
+    const handleFileUpload = async (file: File) => {
+      if (!config.enableFileUpload) return;
+
+      // For now, we'll send the file name as a message
+      // In a full implementation, you'd upload the file to a server first
+      await handleSendMessage(`📎 ${file.name}`, "file");
+    };
+
+    // Expose API methods via ref
+    useImperativeHandle(
+      ref,
+      () => ({
+        open: () => {
+          setIsOpen(true);
+          config.events?.onOpen?.();
+          setHasUnreadMessages(false);
+        },
+        close: () => {
+          setIsOpen(false);
+          config.events?.onClose?.();
+        },
+        toggle: handleToggle,
+        sendMessage: async (message: string) => {
+          await handleSendMessage(message);
+        },
+        setUser: (user) => {
+          updateUser(user);
+        },
+        isOpen: () => isOpen,
+        destroy: () => {
+          resetConversation();
+          setMessages([]);
+          setIsOpen(false);
+        },
+        updateConfig: (newConfig) => {
+          // This would require a more complex implementation to update config dynamically
+          if (config.debug) {
+            console.log(
+              "[BotForge Widget] Config update requested:",
+              newConfig
+            );
+          }
+        },
+      }),
+      [
+        isOpen,
+        handleSendMessage,
+        updateUser,
+        resetConversation,
+        config.events,
+        config.debug,
+      ]
+    );
+
+    const positionStyles: React.CSSProperties = {
+      position: "fixed",
+      zIndex: 9999,
+      fontFamily: config.theme?.fontFamily,
+      ...config.position,
+    };
+
+    return (
+      <div
+        ref={widgetRef}
+        style={{ ...positionStyles, ...props.style }}
+        className={props.className}
+      >
         {isOpen && (
           <ChatWindow
             messages={messages}
             onSendMessage={handleSendMessage}
-            onClose={() => {
-              setIsOpen(false);
-              events?.onClose?.();
-            }}
+            onFileUpload={handleFileUpload}
+            onClose={handleToggle}
             isLoading={isLoading}
-            theme={theme}
-            showBranding={showBranding}
-            chatbotId={chatbotId}
+            isConnected={isConnected}
+            config={config}
+            error={error}
           />
         )}
-      </AnimatePresence>
-
-      <ChatButton onClick={handleToggle} isOpen={isOpen} theme={theme} />
-    </div>
-  );
-});
+        <ChatButton
+          onClick={handleToggle}
+          isOpen={isOpen}
+          config={config}
+          hasUnreadMessages={hasUnreadMessages}
+        />
+      </div>
+    );
+  }
+);
 
 BotForgeWidget.displayName = "BotForgeWidget";
+
+export default BotForgeWidget;

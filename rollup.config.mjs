@@ -1,45 +1,52 @@
-import { nodeResolve } from "@rollup/plugin-node-resolve";
+import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import typescript from "@rollup/plugin-typescript";
 import peerDepsExternal from "rollup-plugin-peer-deps-external";
-import postcss from "rollup-plugin-postcss";
 import terser from "@rollup/plugin-terser";
 import dts from "rollup-plugin-dts";
+
 import fs from "fs";
 const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
 
+const external = ["react", "react-dom", "react-dom/client"];
+
+const plugins = [
+  peerDepsExternal(),
+  resolve({
+    browser: true,
+    preferBuiltins: false,
+  }),
+  commonjs(),
+  typescript({
+    tsconfig: "./tsconfig.json",
+    exclude: ["**/*.test.*", "**/*.stories.*"],
+  }),
+];
+
 export default [
+  // ES Module build
   {
     input: "src/index.ts",
-    output: [
-      {
-        file: packageJson.main,
-        format: "cjs",
-        sourcemap: true,
-      },
-      {
-        file: packageJson.module,
-        format: "esm",
-        sourcemap: true,
-      },
-    ],
-    plugins: [
-      peerDepsExternal(),
-      nodeResolve({ browser: true }),
-      commonjs(),
-      typescript({
-        tsconfig: "./tsconfig.json",
-        exclude: ["**/*.test.*", "**/*.stories.*"],
-      }),
-      postcss({
-        extract: false,
-        inject: true,
-        minimize: true,
-      }),
-      terser(),
-    ],
-    external: ["react", "react-dom"],
+    output: {
+      file: packageJson.module,
+      format: "esm",
+      sourcemap: true,
+    },
+    plugins,
+    external,
   },
+  // CommonJS build
+  {
+    input: "src/index.ts",
+    output: {
+      file: packageJson.main,
+      format: "cjs",
+      sourcemap: true,
+    },
+    plugins,
+    external,
+  },
+  // UMD build for vanilla JS
   {
     input: "src/vanilla/init.ts",
     output: {
@@ -47,14 +54,16 @@ export default [
       format: "umd",
       name: "BotForge",
       sourcemap: true,
+      globals: {
+        react: "React",
+        "react-dom": "ReactDOM",
+        "react-dom/client": "ReactDOM",
+      },
     },
-    plugins: [
-      nodeResolve({ browser: true }),
-      commonjs(),
-      typescript({ tsconfig: "./tsconfig.json" }),
-      terser(),
-    ],
+    plugins: [...plugins, terser()],
+    external,
   },
+  // Type definitions
   {
     input: "dist/types/index.d.ts",
     output: [{ file: "dist/index.d.ts", format: "esm" }],

@@ -1,13 +1,22 @@
-// Main entry point for the BotForge widget package
-export { BotForgeWidget } from './components/BotForgeWidget';
-export { BotForgeProvider } from './components/BotForgeProvider';
-export { useBotForge } from './hooks/useBotForge';
-export { initBotForge } from './vanilla/init';
-export type { 
-  BotForgeConfig, 
-  BotForgeTheme, 
+// Main exports for the package
+export { BotForgeWidget } from "./components/BotForgeWidget";
+export { initBotForge } from "./vanilla/init";
+
+// Type exports
+export type {
+  BotForgeConfig,
+  BotForgeTheme,
   BotForgePosition,
-  BotForgeMessage,
   BotForgeUser,
-  BotForgeEvents
-} from './types';
+  BotForgeEvents,
+  BotForgeMessage,
+  BotForgeAPI,
+  BotForgeMessageData,
+} from "./types";
+
+// Utility exports
+export { BotForgeAPIClient, generateUserIdentifier } from "./utils/api";
+export { useBotForgeAPI } from "./hooks/useBotForgeAPI";
+
+// Version
+export const version = "1.0.0";
