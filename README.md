@@ -369,10 +369,7 @@ widget.updateConfig({
 
 ## 🌐 Browser Support
 
-- Chrome 60+
-- Firefox 60+
-- Safari 12+
-- Edge 79+
+TBA
 
 ## 📦 Bundle Size
 
