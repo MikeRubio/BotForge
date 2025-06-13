@@ -1,5 +1,7 @@
 import { BotForgeMessage, APIResponse, BotForgeUser } from "../types";
 
+export const API_URL = "https://shelxkuuslyxfbiaargz.supabase.co";
+
 export class BotForgeAPIClient {
   private baseUrl: string;
   private chatbotId: string;
@@ -14,7 +16,7 @@ export class BotForgeAPIClient {
 
   constructor(
     chatbotId: string,
-    apiUrl: string = "https://shelxkuuslyxfbiaargz.supabase.co",
+    apiUrl: string = API_URL,
     debug: boolean = false
   ) {
     this.chatbotId = chatbotId;
@@ -26,7 +28,7 @@ export class BotForgeAPIClient {
         this.baseUrl = (window as any).VITE_SUPABASE_URL;
       } else {
         // Fallback to default (this should be overridden by the user)
-        this.baseUrl = "https://shelxkuuslyxfbiaargz.supabase.co";
+        this.baseUrl = API_URL;
         if (debug) {
           console.warn(
             "[BotForge Widget] No API URL provided. Please set the apiUrl parameter to your Supabase project URL."

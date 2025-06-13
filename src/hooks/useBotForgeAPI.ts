@@ -3,12 +3,12 @@ import {
   BotForgeAPIClient,
   generateUserIdentifier,
   createFallbackResponse,
+  API_URL,
 } from "../utils/api";
 import { BotForgeMessage, BotForgeUser } from "../types";
 
 interface UseBotForgeAPIProps {
   chatbotId: string;
-  apiUrl?: string;
   user?: BotForgeUser;
   debug?: boolean;
   onError?: (error: Error) => void;
@@ -18,7 +18,6 @@ interface UseBotForgeAPIProps {
 
 export const useBotForgeAPI = ({
   chatbotId,
-  apiUrl = "https://api.botforge.site",
   user,
   debug = false,
   onError,
@@ -50,7 +49,7 @@ export const useBotForgeAPI = ({
   useEffect(() => {
     if (!mountedRef.current) return;
 
-    apiClientRef.current = new BotForgeAPIClient(chatbotId, apiUrl, debug);
+    apiClientRef.current = new BotForgeAPIClient(chatbotId, API_URL, debug);
 
     // Set user identifier
     const identifier = user?.id || generateUserIdentifier();
@@ -62,7 +61,7 @@ export const useBotForgeAPI = ({
         apiClientRef.current.destroy();
       }
     };
-  }, [chatbotId, apiUrl, debug, user?.id]);
+  }, [chatbotId, API_URL, debug, user?.id]);
 
   // Monitor connection status
   useEffect(() => {

@@ -81,7 +81,6 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
       resetConversation,
     } = useBotForgeAPI({
       chatbotId: config.chatbotId,
-      apiUrl: config.apiUrl,
       user: config.user,
       debug: config.debug,
       onError: (error) => {
