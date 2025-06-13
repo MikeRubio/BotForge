@@ -35,7 +35,7 @@ export interface BotForgeUser {
   name?: string;
   email?: string;
   avatar?: string;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, any>;
 }
 
 export interface BotForgeMessage {
@@ -44,7 +44,7 @@ export interface BotForgeMessage {
   sender: "user" | "bot";
   timestamp: Date;
   type?: "text" | "image" | "file" | "quick_reply";
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, any>;
 }
 
 export interface BotForgeEvents {

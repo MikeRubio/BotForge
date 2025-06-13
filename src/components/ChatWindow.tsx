@@ -19,6 +19,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   isLoading,
   theme,
   showBranding,
+  chatbotId,
 }) => {
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -37,6 +38,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       onSendMessage(inputValue.trim());
       setInputValue("");
     }
+  };
+
+  const handleOptionClick = (option: string) => {
+    onSendMessage(option);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -141,7 +146,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           <div
             style={{ textAlign: "center", color: "#6b7280", padding: "20px" }}
           >
-            <p>👋 Hello! How can I help you today?</p>
+            <p>Starting conversation...</p>
           </div>
         )}
 
@@ -171,7 +176,57 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 lineHeight: "1.4",
               }}
             >
-              {message.content}
+              <div>{message.content}</div>
+
+              {message.sender === "bot" &&
+                message.metadata?.options &&
+                Array.isArray(message.metadata.options) &&
+                message.metadata.options.every(
+                  (opt: unknown) => typeof opt === "string"
+                ) && (
+                  <div
+                    style={{
+                      marginTop: "8px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "4px",
+                    }}
+                  >
+                    {(message.metadata.options as string[]).map(
+                      (option, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleOptionClick(option)}
+                          style={{
+                            padding: "6px 12px",
+                            backgroundColor: "#ffffff",
+                            color: theme.primaryColor || "#3b82f6",
+                            border: `1px solid ${
+                              theme.primaryColor || "#3b82f6"
+                            }`,
+                            borderRadius: "8px",
+                            fontSize: "12px",
+                            cursor: "pointer",
+                            textAlign: "left",
+                            transition: "all 0.2s",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor =
+                              theme.primaryColor || "#3b82f6";
+                            e.currentTarget.style.color = "#ffffff";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "#ffffff";
+                            e.currentTarget.style.color =
+                              theme.primaryColor || "#3b82f6";
+                          }}
+                        >
+                          {option as string}
+                        </button>
+                      )
+                    )}
+                  </div>
+                )}
             </div>
           </div>
         ))}
