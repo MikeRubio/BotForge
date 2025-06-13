@@ -55,7 +55,11 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
     const [isOpen, setIsOpen] = useState(config.autoOpen || false);
     const [messages, setMessages] = useState<BotForgeMessage[]>([]);
     const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
+    const [connectionStatus, setConnectionStatus] = useState<string | null>(
+      null
+    );
     const widgetRef = useRef<HTMLDivElement>(null);
+    const initializationTriggeredRef = useRef(false);
 
     const {
       isConnected,
@@ -102,11 +106,20 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
           config.events?.onBotMessage?.(message);
         }
       },
+      onConnectionChange: (connected) => {
+        if (connected) {
+          setConnectionStatus(null);
+        } else {
+          setConnectionStatus("Connection lost - using offline mode");
+        }
+      },
     });
 
-    // Initialize conversation on mount
+    // Initialize conversation only once when component mounts
     useEffect(() => {
-      if (!isInitialized) {
+      if (!isInitialized && !initializationTriggeredRef.current) {
+        initializationTriggeredRef.current = true;
+
         initializeConversation().then((welcomeMessage) => {
           if (welcomeMessage) {
             setMessages([welcomeMessage]);
@@ -130,6 +143,13 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
         setHasUnreadMessages(false);
       }
     }, [isOpen, hasUnreadMessages]);
+
+    // Show connection status notifications
+    useEffect(() => {
+      if (connectionStatus && config.debug) {
+        console.log("[BotForge Widget]", connectionStatus);
+      }
+    }, [connectionStatus, config.debug]);
 
     const handleToggle = () => {
       const newIsOpen = !isOpen;
@@ -191,6 +211,7 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
           resetConversation();
           setMessages([]);
           setIsOpen(false);
+          initializationTriggeredRef.current = false;
         },
         updateConfig: (newConfig) => {
           // This would require a more complex implementation to update config dynamically

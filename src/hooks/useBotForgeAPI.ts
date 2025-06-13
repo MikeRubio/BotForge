@@ -13,6 +13,7 @@ interface UseBotForgeAPIProps {
   debug?: boolean;
   onError?: (error: Error) => void;
   onMessage?: (message: BotForgeMessage) => void;
+  onConnectionChange?: (isConnected: boolean) => void;
 }
 
 export const useBotForgeAPI = ({
@@ -22,8 +23,9 @@ export const useBotForgeAPI = ({
   debug = false,
   onError,
   onMessage,
+  onConnectionChange,
 }: UseBotForgeAPIProps) => {
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [userIdentifier, setUserIdentifier] = useState<string | null>(null);
@@ -31,9 +33,23 @@ export const useBotForgeAPI = ({
   const [isInitialized, setIsInitialized] = useState(false);
 
   const apiClientRef = useRef<BotForgeAPIClient | null>(null);
+  const initializationAttemptedRef = useRef(false);
+  const mountedRef = useRef(true);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+      if (apiClientRef.current) {
+        apiClientRef.current.destroy();
+      }
+    };
+  }, []);
 
   // Initialize API client
   useEffect(() => {
+    if (!mountedRef.current) return;
+
     apiClientRef.current = new BotForgeAPIClient(chatbotId, apiUrl, debug);
 
     // Set user identifier
@@ -42,24 +58,67 @@ export const useBotForgeAPI = ({
     setUserIdentifier(identifier);
 
     return () => {
-      apiClientRef.current?.reset();
+      if (apiClientRef.current) {
+        apiClientRef.current.destroy();
+      }
     };
   }, [chatbotId, apiUrl, debug, user?.id]);
 
+  // Monitor connection status
+  useEffect(() => {
+    if (!apiClientRef.current) return;
+
+    const checkConnection = () => {
+      if (apiClientRef.current && mountedRef.current) {
+        const isOffline = apiClientRef.current.isOffline();
+        const newConnectionStatus = !isOffline;
+
+        if (newConnectionStatus !== isConnected) {
+          setIsConnected(newConnectionStatus);
+          onConnectionChange?.(newConnectionStatus);
+
+          if (debug) {
+            console.log(
+              "[BotForge Widget] Connection status changed:",
+              newConnectionStatus ? "online" : "offline"
+            );
+          }
+        }
+      }
+    };
+
+    const interval = setInterval(checkConnection, 5000); // Check every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [isConnected, debug, onConnectionChange]);
+
   // Initialize conversation
   const initializeConversation = useCallback(async () => {
-    if (!apiClientRef.current || isInitialized) return null;
+    if (
+      !mountedRef.current ||
+      !apiClientRef.current ||
+      isInitialized ||
+      initializationAttemptedRef.current
+    ) {
+      return null;
+    }
 
+    initializationAttemptedRef.current = true;
     setIsLoading(true);
     setError(null);
 
     try {
       const result = await apiClientRef.current.initializeConversation();
 
+      if (!mountedRef.current) return null;
+
       setConversationId(result.conversationId);
       setUserIdentifier(result.userIdentifier);
-      setIsConnected(true);
       setIsInitialized(true);
+
+      // Update connection status
+      const isOffline = apiClientRef.current.isOffline();
+      setIsConnected(!isOffline);
 
       if (debug) {
         console.log("[BotForge Widget] Conversation initialized:", result);
@@ -67,6 +126,8 @@ export const useBotForgeAPI = ({
 
       return result.welcomeMessage || null;
     } catch (err) {
+      if (!mountedRef.current) return null;
+
       const error =
         err instanceof Error
           ? err
@@ -79,16 +140,20 @@ export const useBotForgeAPI = ({
         console.error("[BotForge Widget] Initialization failed:", error);
       }
 
+      // Reset the attempt flag on error so it can be retried
+      initializationAttemptedRef.current = false;
       return null;
     } finally {
-      setIsLoading(false);
+      if (mountedRef.current) {
+        setIsLoading(false);
+      }
     }
-  }, [isInitialized, debug, onError]);
+  }, [debug, onError, isInitialized]);
 
   // Send message
   const sendMessage = useCallback(
     async (content: string, type: "text" | "file" = "text") => {
-      if (!apiClientRef.current || !conversationId) {
+      if (!mountedRef.current || !apiClientRef.current || !conversationId) {
         throw new Error("Conversation not initialized");
       }
 
@@ -97,6 +162,12 @@ export const useBotForgeAPI = ({
 
       try {
         const result = await apiClientRef.current.sendMessage(content, type);
+
+        if (!mountedRef.current) return result;
+
+        // Update connection status
+        const isOffline = apiClientRef.current.isOffline();
+        setIsConnected(!isOffline);
 
         // Notify about messages
         onMessage?.(result.userMessage);
@@ -108,6 +179,8 @@ export const useBotForgeAPI = ({
 
         return result;
       } catch (err) {
+        if (!mountedRef.current) throw err;
+
         const error =
           err instanceof Error ? err : new Error("Failed to send message");
         setError(error);
@@ -133,7 +206,9 @@ export const useBotForgeAPI = ({
 
         return { userMessage, botMessage };
       } finally {
-        setIsLoading(false);
+        if (mountedRef.current) {
+          setIsLoading(false);
+        }
       }
     },
     [conversationId, debug, onError, onMessage]
@@ -164,11 +239,14 @@ export const useBotForgeAPI = ({
 
   // Reset conversation
   const resetConversation = useCallback(() => {
-    apiClientRef.current?.reset();
+    if (apiClientRef.current) {
+      apiClientRef.current.reset();
+    }
     setConversationId(null);
     setIsInitialized(false);
-    setIsConnected(false);
+    setIsConnected(true);
     setError(null);
+    initializationAttemptedRef.current = false;
   }, []);
 
   return {

@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ES2018",
     "lib": ["DOM", "DOM.Iterable", "ES2018"],
+    "types": ["node"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,

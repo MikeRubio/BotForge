@@ -427,7 +427,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 - 📧 Email: support@botforge.site
 - 📖 Documentation: https://botforge.site/docs
-- 🐛 Issues: https://github.com/botforge/widget/issues
+- 🐛 Issues: https://github.com/MikeRubio/BotForge/issues
 
 ## 🤝 Contributing
 

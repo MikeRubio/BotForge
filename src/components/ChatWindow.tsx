@@ -141,6 +141,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     fontFamily: "inherit",
   };
 
+  const getConnectionStatusMessage = () => {
+    if (!isConnected) {
+      return "Offline mode - Limited functionality";
+    }
+    if (error) {
+      return "Connection issues - Using offline responses";
+    }
+    return null;
+  };
+
+  const connectionStatus = getConnectionStatusMessage();
+
   return (
     <div style={windowStyles}>
       {/* Header */}
@@ -178,17 +190,29 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       </div>
 
       {/* Connection Status */}
-      {!isConnected && (
+      {connectionStatus && (
         <div
           style={{
             padding: "8px 16px",
-            backgroundColor: "#fef3c7",
-            color: "#92400e",
+            backgroundColor: isConnected ? "#fef3c7" : "#fee2e2",
+            color: isConnected ? "#92400e" : "#991b1b",
             fontSize: "12px",
             textAlign: "center",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
           }}
         >
-          {error ? "Connection failed - using offline mode" : "Connecting..."}
+          <div
+            style={{
+              width: "8px",
+              height: "8px",
+              borderRadius: "50%",
+              backgroundColor: isConnected ? "#f59e0b" : "#ef4444",
+            }}
+          />
+          {connectionStatus}
         </div>
       )}
 
@@ -267,11 +291,25 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                   opacity: 0.7,
                   marginTop: "4px",
                   textAlign: message.sender === "user" ? "right" : "left",
+                  display: "flex",
+                  justifyContent:
+                    message.sender === "user" ? "flex-end" : "flex-start",
+                  alignItems: "center",
+                  gap: "4px",
                 }}
               >
-                {formatTime(message.timestamp)}
-                {message.metadata?.fallback && (
-                  <span style={{ marginLeft: "4px" }}>• Offline</span>
+                <span>{formatTime(message.timestamp)}</span>
+                {(message.metadata?.fallback || message.metadata?.offline) && (
+                  <span
+                    style={{
+                      fontSize: "10px",
+                      backgroundColor: "rgba(0, 0, 0, 0.1)",
+                      padding: "2px 4px",
+                      borderRadius: "4px",
+                    }}
+                  >
+                    Offline
+                  </span>
                 )}
               </div>
             </div>
