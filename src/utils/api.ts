@@ -1,5 +1,4 @@
 import { BotForgeMessage, APIResponse, BotForgeUser } from "../types";
-import "dotenv/config";
 
 export class BotForgeAPIClient {
   private baseUrl: string;
@@ -28,7 +27,7 @@ export class BotForgeAPIClient {
     ).replace(/\/$/, "");
     this.anonKey =
       anonKey ??
-      (process.env.ANNON_KEY !== undefined ? process.env.ANNON_KEY : null);
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwMXY1NnV4eThydng1eXBhdGIwb2NrY2I5dHI2YSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzM2NzI5NzE5LCJleHAiOjIwNTIzMDU3MTl9.Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8";
     this.debug = debug;
 
     if (debug) {

@@ -88,7 +88,6 @@
     "node": ">=14.0.0"
   },
   "dependencies": {
-    "dotenv": "^16.5.0",
     "framer-motion": "^10.16.16"
   },
   "directories": {
