@@ -15,6 +15,7 @@ export interface BotForgeMessageData {
   timestamp?: string;
   type?: "text" | "image" | "file";
   metadata?: any;
+  options?: any[];
 }
 
 export interface BotForgeTheme {

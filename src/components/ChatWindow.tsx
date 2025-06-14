@@ -6,6 +6,7 @@ interface ChatWindowProps {
   onSendMessage: (content: string, type?: "text" | "file") => void;
   onFileUpload?: (file: File) => void;
   onClose: () => void;
+  onRestart?: () => void;
   isLoading: boolean;
   isConnected: boolean;
   config: BotForgeConfig;
@@ -19,6 +20,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   onSendMessage,
   onFileUpload,
   onClose,
+  onRestart,
   isLoading,
   isConnected,
   config,
@@ -37,10 +39,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   }, [messages]);
 
   useEffect(() => {
-    if (inputRef.current) {
+    if (inputRef.current && isInitialized) {
       inputRef.current.focus();
     }
-  }, []);
+  }, [isInitialized]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,6 +101,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
+  // Handle quick reply option clicks
+  const handleQuickReply = (option: string) => {
+    if (config.debug) {
+      console.log("[BotForge Widget] Quick reply selected:", option);
+    }
+    onSendMessage(option);
   };
 
   // Check if the chat is ready for user input
@@ -215,49 +225,96 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               alignItems: "center",
               marginTop: "8px",
               fontSize: "12px",
-              color: "#10b981",
+              color: isConnected ? "#10b981" : "#ef4444",
             }}
           >
             <div
               style={{
                 width: "8px",
                 height: "8px",
-                backgroundColor: "#10b981",
+                backgroundColor: isConnected ? "#10b981" : "#ef4444",
                 borderRadius: "50%",
                 marginRight: "6px",
               }}
             />
-            Online
+            {isConnected ? "Online" : "Offline"}
           </div>
         </div>
-        <button
-          onClick={onClose}
-          style={{
-            background: "none",
-            border: "none",
-            color: "#9ca3af",
-            fontSize: "24px",
-            cursor: "pointer",
-            padding: "8px",
-            borderRadius: "8px",
-            transition: "all 0.2s ease",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "40px",
-            height: "40px",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#374151";
-            e.currentTarget.style.color = "#f3f4f6";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-            e.currentTarget.style.color = "#9ca3af";
-          }}
-        >
-          ×
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {/* Restart button */}
+          {onRestart && (
+            <button
+              onClick={onRestart}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#9ca3af",
+                fontSize: "18px",
+                cursor: "pointer",
+                padding: "8px",
+                borderRadius: "8px",
+                transition: "all 0.2s ease",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "40px",
+                height: "40px",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#374151";
+                e.currentTarget.style.color = "#f3f4f6";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = "#9ca3af";
+              }}
+              title="Restart chat"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                <path d="M8 16H3v5" />
+              </svg>
+            </button>
+          )}
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#9ca3af",
+              fontSize: "24px",
+              cursor: "pointer",
+              padding: "8px",
+              borderRadius: "8px",
+              transition: "all 0.2s ease",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "40px",
+              height: "40px",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#374151";
+              e.currentTarget.style.color = "#f3f4f6";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.color = "#9ca3af";
+            }}
+          >
+            ×
+          </button>
+        </div>
       </div>
 
       {/* Connection Status */}
@@ -382,50 +439,100 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             <div
               style={{
                 maxWidth: "75%",
-                padding: "12px 16px",
-                borderRadius:
-                  message.sender === "user"
-                    ? "18px 18px 4px 18px"
-                    : "18px 18px 18px 4px",
-                backgroundColor:
-                  message.sender === "user" ? "#3b82f6" : "#374151",
-                color: message.sender === "user" ? "white" : "#f3f4f6",
-                fontSize: "14px",
-                lineHeight: "1.5",
-                boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
-                border: message.isError ? "1px solid #ef4444" : "none",
-                wordWrap: "break-word",
-                position: "relative",
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px",
               }}
             >
-              <div>{message.content}</div>
               <div
                 style={{
-                  fontSize: "11px",
-                  opacity: 0.7,
-                  marginTop: "6px",
-                  textAlign: message.sender === "user" ? "right" : "left",
-                  display: "flex",
-                  justifyContent:
-                    message.sender === "user" ? "flex-end" : "flex-start",
-                  alignItems: "center",
-                  gap: "6px",
+                  padding: "12px 16px",
+                  borderRadius:
+                    message.sender === "user"
+                      ? "18px 18px 4px 18px"
+                      : "18px 18px 18px 4px",
+                  backgroundColor:
+                    message.sender === "user" ? "#3b82f6" : "#374151",
+                  color: message.sender === "user" ? "white" : "#f3f4f6",
+                  fontSize: "14px",
+                  lineHeight: "1.5",
+                  boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+                  border: message.isError ? "1px solid #ef4444" : "none",
+                  wordWrap: "break-word",
+                  position: "relative",
                 }}
               >
-                <span>{formatTime(message.timestamp)}</span>
-                {(message.metadata?.fallback || message.metadata?.offline) && (
-                  <span
-                    style={{
-                      fontSize: "10px",
-                      backgroundColor: "rgba(0, 0, 0, 0.2)",
-                      padding: "2px 6px",
-                      borderRadius: "6px",
-                    }}
-                  >
-                    Offline
-                  </span>
-                )}
+                <div>{message.content}</div>
+                <div
+                  style={{
+                    fontSize: "11px",
+                    opacity: 0.7,
+                    marginTop: "6px",
+                    textAlign: message.sender === "user" ? "right" : "left",
+                    display: "flex",
+                    justifyContent:
+                      message.sender === "user" ? "flex-end" : "flex-start",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <span>{formatTime(message.timestamp)}</span>
+                  {(message.metadata?.fallback ||
+                    message.metadata?.offline) && (
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        backgroundColor: "rgba(0, 0, 0, 0.2)",
+                        padding: "2px 6px",
+                        borderRadius: "6px",
+                      }}
+                    >
+                      Offline
+                    </span>
+                  )}
+                </div>
               </div>
+
+              {/* Quick Reply Options */}
+              {message.sender === "bot" && message.metadata?.options && (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                  }}
+                >
+                  {message.metadata.options.map(
+                    (option: string, index: number) => (
+                      <button
+                        key={index}
+                        onClick={() => handleQuickReply(option)}
+                        style={{
+                          padding: "8px 12px",
+                          backgroundColor: "#4b5563",
+                          color: "#f3f4f6",
+                          border: "1px solid #6b7280",
+                          borderRadius: "8px",
+                          fontSize: "13px",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease",
+                          textAlign: "left",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = "#374151";
+                          e.currentTarget.style.borderColor = "#9ca3af";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "#4b5563";
+                          e.currentTarget.style.borderColor = "#6b7280";
+                        }}
+                      >
+                        {option}
+                      </button>
+                    )
+                  )}
+                </div>
+              )}
             </div>
 
             {message.sender === "user" && (

@@ -241,6 +241,45 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
       await handleSendMessage(`📎 ${file.name}`, "file");
     };
 
+    const handleRestart = () => {
+      if (config.debug) {
+        console.log("[BotForge Widget] Restarting conversation...");
+      }
+
+      // Clear messages and reset conversation
+      setMessages([]);
+      setHasUnreadMessages(false);
+      resetConversation();
+
+      // Reset initialization flag to allow re-initialization
+      initializationTriggeredRef.current = false;
+
+      // Re-initialize after a short delay
+      setTimeout(() => {
+        if (config.debug) {
+          console.log("[BotForge Widget] Re-initializing after restart...");
+        }
+
+        initializationTriggeredRef.current = true;
+        initializeConversation()
+          .then((welcomeMessage) => {
+            if (welcomeMessage) {
+              setMessages([welcomeMessage]);
+            }
+            setIsLoading(false);
+          })
+          .catch((error) => {
+            setIsLoading(false);
+            if (config.debug) {
+              console.error(
+                "[BotForge Widget] Re-initialization failed:",
+                error
+              );
+            }
+          });
+      }, 100);
+    };
+
     // Expose API methods via ref
     useImperativeHandle(
       ref,
@@ -305,6 +344,7 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
         isInitialized,
       });
     }
+
     return (
       <div
         ref={widgetRef}
@@ -317,6 +357,7 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
             onSendMessage={handleSendMessage}
             onFileUpload={handleFileUpload}
             onClose={handleToggle}
+            onRestart={handleRestart}
             isLoading={isLoading}
             isConnected={isConnected}
             config={config}

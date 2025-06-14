@@ -282,20 +282,31 @@ export class BotForgeAPIClient {
         userIdentifier: this.userIdentifier,
       });
 
-      // Return welcome message if provided
-      const welcomeMessage = response.data.welcomeMessage
-        ? {
-            id: response.data.welcomeMessage.id || "welcome",
-            content:
-              response.data.welcomeMessage.content ||
-              "Hello! How can I help you today?",
-            sender: "bot" as const,
-            timestamp: new Date(
-              response.data.welcomeMessage.timestamp || Date.now()
-            ),
-            type: "text" as const,
-          }
-        : undefined;
+      // Process welcome message if provided
+      let welcomeMessage: BotForgeMessage | undefined;
+
+      if (response.data.welcomeMessage) {
+        welcomeMessage = {
+          id: response.data.welcomeMessage.id || "welcome",
+          content:
+            response.data.welcomeMessage.content ||
+            "Hello! How can I help you today?",
+          sender: "bot" as const,
+          timestamp: new Date(
+            response.data.welcomeMessage.timestamp || Date.now()
+          ),
+          type: "text" as const,
+          metadata: response.data.welcomeMessage.metadata || {},
+        };
+
+        // Check if the welcome message has options (quick replies)
+        if (response.data.welcomeMessage.options) {
+          welcomeMessage.metadata = {
+            ...welcomeMessage.metadata,
+            options: response.data.welcomeMessage.options,
+          };
+        }
+      }
 
       return {
         conversationId: this.conversationId,
@@ -353,6 +364,17 @@ export class BotForgeAPIClient {
       return { userMessage, botMessage };
     }
 
+    // Process bot message and check for options/quick replies
+    let botMessageMetadata = response.data.botMessage?.metadata || {};
+
+    // Check if the response contains options (quick replies)
+    if (response.data.botMessage?.options) {
+      botMessageMetadata = {
+        ...botMessageMetadata,
+        options: response.data.botMessage.options,
+      };
+    }
+
     const botMessage: BotForgeMessage = {
       id: response.data.botMessage?.id || `bot-${Date.now()}`,
       content:
@@ -361,7 +383,7 @@ export class BotForgeAPIClient {
       sender: "bot",
       timestamp: new Date(response.data.botMessage?.timestamp || Date.now()),
       type: "text",
-      metadata: response.data.botMessage?.metadata,
+      metadata: botMessageMetadata,
     };
 
     this.log("Messages created:", { userMessage, botMessage });
@@ -417,24 +439,22 @@ export class BotForgeAPIClient {
 
   reset() {
     this.conversationId = null;
-    this.userIdentifier = null;
     this.isInitializing = false;
     this.retryCount = 0;
-    this.isOfflineMode = false;
 
-    if (this.connectionCheckInterval) {
-      clearInterval(this.connectionCheckInterval);
-      this.connectionCheckInterval = null;
-    }
+    // Don't reset userIdentifier to maintain user identity
+    // Don't reset isOfflineMode to maintain connection state awareness
 
-    this.log("API client reset");
+    this.log("API client reset - conversation state only");
   }
 
   destroy() {
     this.reset();
     if (this.connectionCheckInterval) {
       clearInterval(this.connectionCheckInterval);
+      this.connectionCheckInterval = null;
     }
+    this.log("API client fully destroyed");
   }
 }
 
