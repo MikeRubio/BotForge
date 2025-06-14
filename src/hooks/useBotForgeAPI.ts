@@ -327,6 +327,7 @@ export const useBotForgeAPI = ({
     userIdentifier,
     error,
     isInitialized,
+    setIsLoading,
 
     // Actions
     initializeConversation,

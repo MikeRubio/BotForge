@@ -89,6 +89,7 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
       initializeConversation,
       sendMessage: apiSendMessage,
       updateUser,
+      setIsLoading,
       resetConversation,
     } = useBotForgeAPI({
       chatbotId: config.chatbotId,
@@ -162,9 +163,11 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
                 console.log("[BotForge Widget] Welcome message added to state");
               }
             }
+            setIsLoading(false);
             config.events?.onReady?.();
           })
           .catch((error) => {
+            setIsLoading(false);
             if (config.debug) {
               console.error("[BotForge Widget] Initialization failed:", error);
             }
