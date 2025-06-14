@@ -53,6 +53,10 @@ export const useBotForgeAPI = ({
     if (!mountedRef.current) return;
 
     try {
+      if (!apiUrl || !anonKey) {
+        throw new Error("API URL and anonymous key are required");
+      }
+
       apiClientRef.current = new BotForgeAPIClient(
         chatbotId,
         apiUrl,
@@ -158,18 +162,24 @@ export const useBotForgeAPI = ({
         console.log("[BotForge Widget] Conversation initialized:", result);
       }
 
-      // Return the welcome message if it exists
-      if (result.welcomeMessage) {
-        if (debug) {
-          console.log(
-            "[BotForge Widget] Returning welcome message:",
-            result.welcomeMessage
-          );
-        }
-        return result.welcomeMessage;
+      // Always return a welcome message, even if none was provided
+      const welcomeMessage = result.welcomeMessage || {
+        id: "welcome-default",
+        content:
+          "Hi! I'm your BotForge assistant. I can help you create chatbots, understand features, troubleshoot issues, and more. What would you like to know?",
+        sender: "bot" as const,
+        timestamp: new Date(),
+        type: "text" as const,
+      };
+
+      if (debug) {
+        console.log(
+          "[BotForge Widget] Returning welcome message:",
+          welcomeMessage
+        );
       }
 
-      return null;
+      return welcomeMessage;
     } catch (err) {
       if (!mountedRef.current) return null;
 
@@ -185,9 +195,20 @@ export const useBotForgeAPI = ({
         console.error("[BotForge Widget] Initialization failed:", error);
       }
 
-      // Reset the attempt flag on error so it can be retried
-      initializationAttemptedRef.current = false;
-      return null;
+      // Still mark as initialized and provide a fallback welcome message
+      setIsInitialized(true);
+
+      const fallbackWelcome: BotForgeMessage = {
+        id: "welcome-fallback",
+        content:
+          "Hello! I'm currently in offline mode, but I can still help you with basic questions.",
+        sender: "bot",
+        timestamp: new Date(),
+        type: "text",
+        metadata: { offline: true },
+      };
+
+      return fallbackWelcome;
     } finally {
       if (mountedRef.current) {
         setIsLoading(false);
