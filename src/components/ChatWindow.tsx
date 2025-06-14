@@ -98,57 +98,59 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   };
 
   const windowStyles: React.CSSProperties = {
-    width: config.theme?.chatWidth || "380px",
-    height: config.theme?.chatHeight || "500px",
-    backgroundColor: config.theme?.backgroundColor || "#ffffff",
-    border: "1px solid #e5e7eb",
-    borderRadius: config.theme?.borderRadius || "12px",
-    boxShadow:
-      "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+    width: config.theme?.chatWidth || "400px",
+    height: config.theme?.chatHeight || "600px",
+    backgroundColor: "#1f2937",
+    border: "1px solid #374151",
+    borderRadius: "16px",
+    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
     display: "flex",
     flexDirection: "column",
     marginBottom: "80px",
     overflow: "hidden",
-    fontFamily: config.theme?.fontFamily || "inherit",
+    fontFamily:
+      config.theme?.fontFamily ||
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   };
 
   const headerStyles: React.CSSProperties = {
-    backgroundColor:
-      config.theme?.headerColor || config.theme?.primaryColor || "#3B82F6",
-    color: "white",
-    padding: "16px",
+    backgroundColor: "#1f2937",
+    color: "#f3f4f6",
+    padding: "20px",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    borderBottom: "1px solid #374151",
   };
 
   const messagesStyles: React.CSSProperties = {
     flex: 1,
     overflowY: "auto",
-    padding: "16px",
+    padding: "20px",
     display: "flex",
     flexDirection: "column",
-    gap: "12px",
-    backgroundColor: "#f9fafb",
+    gap: "16px",
+    backgroundColor: "#111827",
     position: "relative",
   };
 
   const inputContainerStyles: React.CSSProperties = {
-    padding: "16px",
-    borderTop: "1px solid #e5e7eb",
-    backgroundColor: config.theme?.backgroundColor || "#ffffff",
+    padding: "20px",
+    borderTop: "1px solid #374151",
+    backgroundColor: "#1f2937",
   };
 
   const inputStyles: React.CSSProperties = {
     width: "100%",
-    padding: "12px",
-    border: "1px solid #d1d5db",
-    borderRadius: "8px",
+    padding: "12px 16px",
+    border: "1px solid #4b5563",
+    borderRadius: "12px",
     outline: "none",
     fontSize: "14px",
-    backgroundColor: "#ffffff",
-    color: config.theme?.textColor || "#000000",
+    backgroundColor: "#374151",
+    color: "#f3f4f6",
     fontFamily: "inherit",
+    transition: "border-color 0.2s ease",
   };
 
   const getConnectionStatusMessage = () => {
@@ -177,31 +179,71 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       {/* Header */}
       <div style={headerStyles}>
         <div>
-          <div style={{ fontWeight: "bold", fontSize: "16px" }}>
-            {config.title || "Chat with us"}
+          <div
+            style={{
+              fontWeight: "600",
+              fontSize: "18px",
+              color: "#f3f4f6",
+              marginBottom: "4px",
+            }}
+          >
+            {config.title || "BotForge Support"}
           </div>
           {config.subtitle && (
-            <div style={{ fontSize: "12px", opacity: 0.9 }}>
+            <div
+              style={{
+                fontSize: "14px",
+                color: "#9ca3af",
+              }}
+            >
               {config.subtitle}
             </div>
           )}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginTop: "8px",
+              fontSize: "12px",
+              color: "#10b981",
+            }}
+          >
+            <div
+              style={{
+                width: "8px",
+                height: "8px",
+                backgroundColor: "#10b981",
+                borderRadius: "50%",
+                marginRight: "6px",
+              }}
+            />
+            Online
+          </div>
         </div>
         <button
           onClick={onClose}
           style={{
             background: "none",
             border: "none",
-            color: "white",
-            fontSize: "20px",
+            color: "#9ca3af",
+            fontSize: "24px",
             cursor: "pointer",
-            padding: "4px",
-            borderRadius: "4px",
+            padding: "8px",
+            borderRadius: "8px",
+            transition: "all 0.2s ease",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "40px",
+            height: "40px",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
+            e.currentTarget.style.backgroundColor = "#374151";
+            e.currentTarget.style.color = "#f3f4f6";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = "transparent";
+            e.currentTarget.style.color = "#9ca3af";
           }}
         >
           ×
@@ -212,10 +254,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       {connectionStatus && (
         <div
           style={{
-            padding: "8px 16px",
+            padding: "12px 20px",
             backgroundColor: isConnected ? "#fef3c7" : "#fee2e2",
             color: isConnected ? "#92400e" : "#991b1b",
-            fontSize: "12px",
+            fontSize: "13px",
             textAlign: "center",
             display: "flex",
             alignItems: "center",
@@ -259,7 +301,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               borderRadius: "8px",
             }}
           >
-            <div style={{ color: "#3b82f6", fontWeight: "bold" }}>
+            <div style={{ color: "#3b82f6", fontWeight: "600" }}>
               Drop file here to upload
             </div>
           </div>
@@ -270,11 +312,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             style={{
               textAlign: "center",
               color: "#6b7280",
-              fontSize: "14px",
-              padding: "20px",
+              fontSize: "15px",
+              padding: "40px 20px",
+              lineHeight: "1.6",
             }}
           >
-            {config.greeting || "Hello! How can I help you today?"}
+            {config.greeting ||
+              "Hi! I'm your BotForge assistant. I can help you create chatbots, understand features, troubleshoot issues, and more. What would you like to know?"}
           </div>
         )}
 
@@ -285,35 +329,63 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               display: "flex",
               justifyContent:
                 message.sender === "user" ? "flex-end" : "flex-start",
+              alignItems: "flex-start",
+              gap: "12px",
             }}
           >
+            {message.sender === "bot" && (
+              <div
+                style={{
+                  width: "32px",
+                  height: "32px",
+                  backgroundColor:
+                    "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+                  background:
+                    "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  marginTop: "4px",
+                }}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                >
+                  <path d="M12 8V4H8" />
+                  <rect width="16" height="12" x="4" y="8" rx="2" />
+                  <path d="m14 8-2 2-2-2" />
+                  <path d="M18 12h2" />
+                  <path d="M22 12v6" />
+                  <path d="M4 12H2" />
+                  <path d="M2 12v6" />
+                </svg>
+              </div>
+            )}
+
             <div
               style={{
-                maxWidth: "80%",
+                maxWidth: "75%",
                 padding: "12px 16px",
-                borderRadius: "18px",
+                borderRadius:
+                  message.sender === "user"
+                    ? "18px 18px 4px 18px"
+                    : "18px 18px 18px 4px",
                 backgroundColor:
-                  message.sender === "user"
-                    ? config.theme?.userMessageColor ||
-                      config.theme?.primaryColor ||
-                      "#3B82F6"
-                    : config.theme?.botMessageColor || "#ffffff",
-                color:
-                  message.sender === "user"
-                    ? "white"
-                    : config.theme?.textColor || "#000000",
+                  message.sender === "user" ? "#3b82f6" : "#374151",
+                color: message.sender === "user" ? "white" : "#f3f4f6",
                 fontSize: "14px",
-                lineHeight: "1.4",
-                boxShadow:
-                  message.sender === "bot"
-                    ? "0 1px 2px rgba(0, 0, 0, 0.1)"
-                    : "none",
-                border: message.isError
-                  ? "1px solid #ef4444"
-                  : message.sender === "bot"
-                  ? "1px solid #e5e7eb"
-                  : "none",
+                lineHeight: "1.5",
+                boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+                border: message.isError ? "1px solid #ef4444" : "none",
                 wordWrap: "break-word",
+                position: "relative",
               }}
             >
               <div>{message.content}</div>
@@ -321,13 +393,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 style={{
                   fontSize: "11px",
                   opacity: 0.7,
-                  marginTop: "4px",
+                  marginTop: "6px",
                   textAlign: message.sender === "user" ? "right" : "left",
                   display: "flex",
                   justifyContent:
                     message.sender === "user" ? "flex-end" : "flex-start",
                   alignItems: "center",
-                  gap: "4px",
+                  gap: "6px",
                 }}
               >
                 <span>{formatTime(message.timestamp)}</span>
@@ -335,9 +407,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                   <span
                     style={{
                       fontSize: "10px",
-                      backgroundColor: "rgba(0, 0, 0, 0.1)",
-                      padding: "2px 4px",
-                      borderRadius: "4px",
+                      backgroundColor: "rgba(0, 0, 0, 0.2)",
+                      padding: "2px 6px",
+                      borderRadius: "6px",
                     }}
                   >
                     Offline
@@ -345,18 +417,83 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 )}
               </div>
             </div>
+
+            {message.sender === "user" && (
+              <div
+                style={{
+                  width: "32px",
+                  height: "32px",
+                  backgroundColor: "#3b82f6",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  marginTop: "4px",
+                }}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
+            )}
           </div>
         ))}
 
-        {isLoading && config.enableTypingIndicator && (
-          <div style={{ display: "flex", justifyContent: "flex-start" }}>
+        {/* Only show typing indicator when actually loading a response, not during initialization */}
+        {isLoading && messages.length > 0 && config.enableTypingIndicator && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-start",
+              alignItems: "flex-start",
+              gap: "12px",
+            }}
+          >
+            <div
+              style={{
+                width: "32px",
+                height: "32px",
+                background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                marginTop: "4px",
+              }}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+              >
+                <path d="M12 8V4H8" />
+                <rect width="16" height="12" x="4" y="8" rx="2" />
+                <path d="m14 8-2 2-2-2" />
+                <path d="M18 12h2" />
+                <path d="M22 12v6" />
+                <path d="M4 12H2" />
+                <path d="M2 12v6" />
+              </svg>
+            </div>
             <div
               style={{
                 padding: "12px 16px",
-                borderRadius: "18px",
-                backgroundColor: "#ffffff",
+                borderRadius: "18px 18px 18px 4px",
+                backgroundColor: "#374151",
                 boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
-                border: "1px solid #e5e7eb",
               }}
             >
               <div
@@ -399,21 +536,39 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
       {/* Input */}
       <div style={inputContainerStyles}>
-        <form onSubmit={handleSubmit} style={{ display: "flex", gap: "8px" }}>
-          <input
-            ref={inputRef}
-            type="text"
-            value={inputValue}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
-            placeholder={config.placeholder || "Type your message..."}
-            disabled={isLoading}
-            style={{
-              ...inputStyles,
-              opacity: isLoading ? 0.5 : 1,
-              cursor: isLoading ? "not-allowed" : "text",
-            }}
-          />
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "flex", gap: "12px", alignItems: "flex-end" }}
+        >
+          <div style={{ flex: 1, position: "relative" }}>
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
+              placeholder={
+                config.placeholder ||
+                "Ask me about BotForge features, pricing, or how to build chatbots..."
+              }
+              disabled={isLoading && messages.length === 0} // Only disable during initial load
+              style={{
+                ...inputStyles,
+                opacity: isLoading && messages.length === 0 ? 0.5 : 1,
+                cursor:
+                  isLoading && messages.length === 0 ? "not-allowed" : "text",
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = "#3b82f6";
+                e.currentTarget.style.boxShadow =
+                  "0 0 0 3px rgba(59, 130, 246, 0.1)";
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = "#4b5563";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            />
+          </div>
 
           {config.enableFileUpload && (
             <>
@@ -423,15 +578,31 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 disabled={isLoading}
                 style={{
                   padding: "12px",
-                  border: "1px solid #d1d5db",
-                  borderRadius: "8px",
-                  backgroundColor: "#f3f4f6",
-                  color: "#374151",
+                  border: "1px solid #4b5563",
+                  borderRadius: "12px",
+                  backgroundColor: "#374151",
+                  color: "#9ca3af",
                   cursor: "pointer",
                   fontSize: "16px",
                   opacity: isLoading ? 0.5 : 1,
+                  transition: "all 0.2s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "44px",
+                  height: "44px",
                 }}
                 title="Upload file"
+                onMouseEnter={(e) => {
+                  if (!isLoading) {
+                    e.currentTarget.style.backgroundColor = "#4b5563";
+                    e.currentTarget.style.color = "#f3f4f6";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#374151";
+                  e.currentTarget.style.color = "#9ca3af";
+                }}
               >
                 📎
               </button>
@@ -447,21 +618,65 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
           <button
             type="submit"
-            disabled={!inputValue.trim() || isLoading}
+            disabled={
+              !inputValue.trim() || (isLoading && messages.length === 0)
+            }
             style={{
-              padding: "12px 16px",
+              padding: "12px 20px",
               border: "none",
-              borderRadius: "8px",
-              backgroundColor: config.theme?.primaryColor || "#3B82F6",
+              borderRadius: "12px",
+              backgroundColor: config.theme?.primaryColor || "#3b82f6",
               color: "white",
               cursor: "pointer",
               fontSize: "14px",
-              fontWeight: "bold",
-              opacity: !inputValue.trim() || isLoading ? 0.5 : 1,
-              transition: "opacity 0.2s",
+              fontWeight: "600",
+              opacity:
+                !inputValue.trim() || (isLoading && messages.length === 0)
+                  ? 0.5
+                  : 1,
+              transition: "all 0.2s ease",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minWidth: "60px",
+              height: "44px",
+            }}
+            onMouseEnter={(e) => {
+              if (inputValue.trim() && !(isLoading && messages.length === 0)) {
+                e.currentTarget.style.backgroundColor = "#2563eb";
+                e.currentTarget.style.transform = "translateY(-1px)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor =
+                config.theme?.primaryColor || "#3b82f6";
+              e.currentTarget.style.transform = "translateY(0)";
             }}
           >
-            {isLoading ? "..." : "Send"}
+            {isLoading && messages.length === 0 ? (
+              <div
+                style={{
+                  width: "16px",
+                  height: "16px",
+                  border: "2px solid rgba(255, 255, 255, 0.3)",
+                  borderTop: "2px solid white",
+                  borderRadius: "50%",
+                  animation: "spin 1s linear infinite",
+                }}
+              />
+            ) : (
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="m22 2-7 20-4-9-9-4Z" />
+                <path d="M22 2 11 13" />
+              </svg>
+            )}
           </button>
         </form>
       </div>
@@ -469,11 +684,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       {config.showBranding && (
         <div
           style={{
-            padding: "8px 16px",
+            padding: "12px 20px",
             textAlign: "center",
-            fontSize: "11px",
-            color: "#9ca3af",
-            borderTop: "1px solid #e5e7eb",
+            fontSize: "12px",
+            color: "#6b7280",
+            borderTop: "1px solid #374151",
+            backgroundColor: "#1f2937",
           }}
         >
           Powered by{" "}
@@ -484,7 +700,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             style={{
               color: "#3b82f6",
               textDecoration: "none",
-              fontWeight: "bold",
+              fontWeight: "600",
             }}
           >
             BotForge
@@ -501,6 +717,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             40% {
               opacity: 1;
             }
+          }
+          
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
           }
         `}
       </style>

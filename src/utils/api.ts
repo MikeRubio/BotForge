@@ -21,13 +21,17 @@ export class BotForgeAPIClient {
   ) {
     this.chatbotId = chatbotId;
 
-    // Default to BotForge's production backend
-    this.baseUrl = (
-      apiUrl || "https://zp1v56uxy8rdx5ypatb0ockcb9tr6a.supabase.co"
-    ).replace(/\/$/, "");
-    this.anonKey =
-      anonKey ??
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwMXY1NnV4eThydng1eXBhdGIwb2NrY2I5dHI2YSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzM2NzI5NzE5LCJleHAiOjIwNTIzMDU3MTl9.Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8";
+    // Use provided API URL or throw error if not provided
+    if (!apiUrl) {
+      throw new Error("API URL is required for BotForge widget");
+    }
+    this.baseUrl = apiUrl.replace(/\/$/, "");
+
+    // Use provided anonymous key or throw error if not provided
+    if (!anonKey) {
+      throw new Error("Anonymous key is required for BotForge widget");
+    }
+    this.anonKey = anonKey;
     this.debug = debug;
 
     if (debug) {

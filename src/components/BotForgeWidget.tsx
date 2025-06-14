@@ -11,21 +11,19 @@ import { BotForgeConfig, BotForgeMessage, BotForgeAPI } from "../types";
 import { useBotForgeAPI } from "../hooks/useBotForgeAPI";
 
 const defaultConfig: Partial<BotForgeConfig> = {
-  // Default to BotForge's production backend
-  apiUrl: "https://zp1v56uxy8rdx5ypatb0ockcb9tr6a.supabase.co",
   theme: {
     primaryColor: "#3B82F6",
-    backgroundColor: "#ffffff",
-    textColor: "#1f2937",
-    borderRadius: "12px",
+    backgroundColor: "#1f2937",
+    textColor: "#f3f4f6",
+    borderRadius: "16px",
     fontFamily:
       '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     buttonSize: "medium",
-    chatHeight: "500px",
-    chatWidth: "380px",
-    headerColor: "#3B82F6",
+    chatHeight: "600px",
+    chatWidth: "400px",
+    headerColor: "#1f2937",
     userMessageColor: "#3B82F6",
-    botMessageColor: "#f3f4f6",
+    botMessageColor: "#374151",
   },
   position: {
     bottom: "20px",
@@ -37,10 +35,12 @@ const defaultConfig: Partial<BotForgeConfig> = {
   enableEmoji: true,
   enableTypingIndicator: true,
   maxMessages: 100,
-  greeting: "Hello! How can I help you today?",
-  placeholder: "Type your message...",
-  title: "Chat with us",
-  subtitle: "We're here to help",
+  greeting:
+    "Hi! I'm your BotForge assistant. I can help you create chatbots, understand features, troubleshoot issues, and more. What would you like to know?",
+  placeholder:
+    "Ask me about BotForge features, pricing, or how to build chatbots...",
+  title: "BotForge Support",
+  subtitle: "Get instant help",
   language: "en",
   debug: false,
 };
@@ -57,6 +57,16 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
     // Validate required props
     if (!config.chatbotId) {
       console.error("[BotForge Widget] chatbotId is required");
+      return null;
+    }
+
+    if (!config.apiUrl) {
+      console.error("[BotForge Widget] apiUrl is required");
+      return null;
+    }
+
+    if (!config.anonKey) {
+      console.error("[BotForge Widget] anonKey is required");
       return null;
     }
 
@@ -164,11 +174,11 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
 
     // Handle auto-open
     useEffect(() => {
-      if (config.autoOpen && !isOpen) {
+      if (config.autoOpen && !isOpen && isInitialized) {
         setIsOpen(true);
         config.events?.onOpen?.();
       }
-    }, [config.autoOpen, isOpen, config.events]);
+    }, [config.autoOpen, isOpen, config.events, isInitialized]);
 
     // Clear unread messages when chat is opened
     useEffect(() => {
@@ -200,12 +210,9 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
       content: string,
       type: "text" | "file" = "text"
     ) => {
-      if (!content.trim() || isLoading) {
+      if (!content.trim()) {
         if (config.debug) {
-          console.log("[BotForge Widget] Message send blocked:", {
-            content: content.trim(),
-            isLoading,
-          });
+          console.log("[BotForge Widget] Message send blocked: empty content");
         }
         return;
       }

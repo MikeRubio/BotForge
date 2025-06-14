@@ -52,17 +52,32 @@ export const useBotForgeAPI = ({
   useEffect(() => {
     if (!mountedRef.current) return;
 
-    apiClientRef.current = new BotForgeAPIClient(
-      chatbotId,
-      apiUrl,
-      anonKey,
-      debug
-    );
+    try {
+      apiClientRef.current = new BotForgeAPIClient(
+        chatbotId,
+        apiUrl,
+        anonKey,
+        debug
+      );
 
-    // Set user identifier
-    const identifier = user?.id || generateUserIdentifier();
-    apiClientRef.current.setUserIdentifier(identifier);
-    setUserIdentifier(identifier);
+      // Set user identifier
+      const identifier = user?.id || generateUserIdentifier();
+      apiClientRef.current.setUserIdentifier(identifier);
+      setUserIdentifier(identifier);
+    } catch (err) {
+      const error =
+        err instanceof Error
+          ? err
+          : new Error("Failed to initialize API client");
+      setError(error);
+      onError?.(error);
+      if (debug) {
+        console.error(
+          "[BotForge Widget] Failed to initialize API client:",
+          error
+        );
+      }
+    }
 
     return () => {
       if (apiClientRef.current) {
