@@ -210,6 +210,7 @@ export class BotForgeAPIClient {
     conversationId: string;
     userIdentifier: string;
     welcomeMessage?: BotForgeMessage;
+    followUpMessage?: BotForgeMessage;
   }> {
     // Prevent multiple simultaneous initialization attempts
     if (this.isInitializing) {

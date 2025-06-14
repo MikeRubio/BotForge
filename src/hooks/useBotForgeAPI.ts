@@ -186,6 +186,21 @@ export const useBotForgeAPI = ({
         );
       }
 
+      // If there's a follow-up message, add it after a short delay
+      if (result.followUpMessage) {
+        setTimeout(() => {
+          if (debug) {
+            console.log(
+              "[BotForge Widget] Adding follow-up message:",
+              result.followUpMessage
+            );
+          }
+          if (result.followUpMessage) {
+            onMessage?.(result.followUpMessage);
+          }
+        }, 1000);
+      }
+
       return welcomeMessage;
     } catch (err) {
       const error =
@@ -218,7 +233,7 @@ export const useBotForgeAPI = ({
       setIsLoading(false);
       initializationInProgressRef.current = false;
     }
-  }, [debug, onError, isInitialized]);
+  }, [debug, onError, isInitialized, onMessage]);
 
   // Send message
   const sendMessage = useCallback(
