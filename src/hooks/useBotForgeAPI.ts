@@ -35,28 +35,19 @@ export const useBotForgeAPI = ({
   const [isInitialized, setIsInitialized] = useState(false);
 
   const apiClientRef = useRef<BotForgeAPIClient | null>(null);
-  const mountedRef = useRef(true);
   const initializationInProgressRef = useRef(false);
   const apiClientCreatedRef = useRef(false);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      mountedRef.current = false;
-      if (apiClientRef.current) {
-        apiClientRef.current.destroy();
-      }
-    };
-  }, []);
+  // Create a stable key for this widget instance
+  const instanceKey = useRef(`widget-${chatbotId}-${Date.now()}`);
 
   // Initialize API client ONCE and ONLY ONCE
   useEffect(() => {
-    if (!mountedRef.current || apiClientCreatedRef.current) {
+    if (apiClientCreatedRef.current) {
       if (debug) {
-        console.log("[BotForge Widget] Skipping API client creation:", {
-          mounted: mountedRef.current,
-          alreadyCreated: apiClientCreatedRef.current,
-        });
+        console.log(
+          "[BotForge Widget] API client already exists, skipping creation"
+        );
       }
       return;
     }
@@ -109,7 +100,7 @@ export const useBotForgeAPI = ({
     if (!apiClientRef.current) return;
 
     const checkConnection = () => {
-      if (apiClientRef.current && mountedRef.current) {
+      if (apiClientRef.current) {
         const isOffline = apiClientRef.current.isOffline();
         const newConnectionStatus = !isOffline;
 
@@ -135,14 +126,12 @@ export const useBotForgeAPI = ({
   // Initialize conversation
   const initializeConversation = useCallback(async () => {
     if (
-      !mountedRef.current ||
       !apiClientRef.current ||
       isInitialized ||
       initializationInProgressRef.current
     ) {
       if (debug) {
         console.log("[BotForge Widget] Skipping initialization:", {
-          mounted: mountedRef.current,
           hasClient: !!apiClientRef.current,
           isInitialized,
           inProgress: initializationInProgressRef.current,
@@ -161,8 +150,6 @@ export const useBotForgeAPI = ({
 
     try {
       const result = await apiClientRef.current.initializeConversation();
-
-      if (!mountedRef.current) return null;
 
       // CRITICAL: Update React state with the API result
       setConversationId(result.conversationId);
@@ -201,8 +188,6 @@ export const useBotForgeAPI = ({
 
       return welcomeMessage;
     } catch (err) {
-      if (!mountedRef.current) return null;
-
       const error =
         err instanceof Error
           ? err
@@ -230,17 +215,15 @@ export const useBotForgeAPI = ({
 
       return fallbackWelcome;
     } finally {
-      if (mountedRef.current) {
-        setIsLoading(false);
-        initializationInProgressRef.current = false;
-      }
+      setIsLoading(false);
+      initializationInProgressRef.current = false;
     }
   }, [debug, onError, isInitialized]);
 
   // Send message
   const sendMessage = useCallback(
     async (content: string, type: "text" | "file" = "text") => {
-      if (!mountedRef.current || !apiClientRef.current || !conversationId) {
+      if (!apiClientRef.current || !conversationId) {
         throw new Error("Conversation not initialized");
       }
 
@@ -253,8 +236,6 @@ export const useBotForgeAPI = ({
 
       try {
         const result = await apiClientRef.current.sendMessage(content, type);
-
-        if (!mountedRef.current) return result;
 
         // Update connection status
         const isOffline = apiClientRef.current.isOffline();
@@ -270,8 +251,6 @@ export const useBotForgeAPI = ({
 
         return result;
       } catch (err) {
-        if (!mountedRef.current) throw err;
-
         const error =
           err instanceof Error ? err : new Error("Failed to send message");
         setError(error);
@@ -297,9 +276,7 @@ export const useBotForgeAPI = ({
 
         return { userMessage, botMessage };
       } finally {
-        if (mountedRef.current) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
     },
     [conversationId, debug, onError, onMessage]
