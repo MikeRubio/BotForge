@@ -10,6 +10,8 @@ interface ChatWindowProps {
   isConnected: boolean;
   config: BotForgeConfig;
   error?: Error | null;
+  isInitialized: boolean;
+  conversationId: string | null;
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -21,6 +23,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   isConnected,
   config,
   error,
+  isInitialized,
+  conversationId,
 }) => {
   const [inputValue, setInputValue] = useState("");
   const [isDragging, setIsDragging] = useState(false);
@@ -40,7 +44,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputValue.trim() && !isLoading) {
+    if (inputValue.trim() && !isLoading && isInitialized && conversationId) {
       if (config.debug) {
         console.log("[BotForge Widget] Submitting message:", inputValue.trim());
       }
@@ -96,6 +100,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
+
+  // Check if the chat is ready for user input
+  const isChatReady = isInitialized && conversationId && !isLoading;
 
   const windowStyles: React.CSSProperties = {
     width: config.theme?.chatWidth || "400px",
@@ -171,6 +178,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       inputValue,
       isLoading,
       isConnected,
+      isInitialized,
+      conversationId,
+      isChatReady,
     });
   }
 
@@ -548,20 +558,23 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               onChange={handleInputChange}
               onKeyPress={handleKeyPress}
               placeholder={
-                config.placeholder ||
-                "Ask me about BotForge features, pricing, or how to build chatbots..."
+                !isChatReady
+                  ? "Initializing chat..."
+                  : config.placeholder ||
+                    "Ask me about BotForge features, pricing, or how to build chatbots..."
               }
-              disabled={isLoading && messages.length === 0} // Only disable during initial load
+              disabled={!isChatReady}
               style={{
                 ...inputStyles,
-                opacity: isLoading && messages.length === 0 ? 0.5 : 1,
-                cursor:
-                  isLoading && messages.length === 0 ? "not-allowed" : "text",
+                opacity: !isChatReady ? 0.5 : 1,
+                cursor: !isChatReady ? "not-allowed" : "text",
               }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = "#3b82f6";
-                e.currentTarget.style.boxShadow =
-                  "0 0 0 3px rgba(59, 130, 246, 0.1)";
+                if (isChatReady) {
+                  e.currentTarget.style.borderColor = "#3b82f6";
+                  e.currentTarget.style.boxShadow =
+                    "0 0 0 3px rgba(59, 130, 246, 0.1)";
+                }
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = "#4b5563";
@@ -575,16 +588,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={isLoading}
+                disabled={!isChatReady}
                 style={{
                   padding: "12px",
                   border: "1px solid #4b5563",
                   borderRadius: "12px",
                   backgroundColor: "#374151",
                   color: "#9ca3af",
-                  cursor: "pointer",
+                  cursor: isChatReady ? "pointer" : "not-allowed",
                   fontSize: "16px",
-                  opacity: isLoading ? 0.5 : 1,
+                  opacity: !isChatReady ? 0.5 : 1,
                   transition: "all 0.2s ease",
                   display: "flex",
                   alignItems: "center",
@@ -594,7 +607,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 }}
                 title="Upload file"
                 onMouseEnter={(e) => {
-                  if (!isLoading) {
+                  if (isChatReady) {
                     e.currentTarget.style.backgroundColor = "#4b5563";
                     e.currentTarget.style.color = "#f3f4f6";
                   }
@@ -618,22 +631,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
           <button
             type="submit"
-            disabled={
-              !inputValue.trim() || (isLoading && messages.length === 0)
-            }
+            disabled={!inputValue.trim() || !isChatReady}
             style={{
               padding: "12px 20px",
               border: "none",
               borderRadius: "12px",
               backgroundColor: config.theme?.primaryColor || "#3b82f6",
               color: "white",
-              cursor: "pointer",
+              cursor:
+                !inputValue.trim() || !isChatReady ? "not-allowed" : "pointer",
               fontSize: "14px",
               fontWeight: "600",
-              opacity:
-                !inputValue.trim() || (isLoading && messages.length === 0)
-                  ? 0.5
-                  : 1,
+              opacity: !inputValue.trim() || !isChatReady ? 0.5 : 1,
               transition: "all 0.2s ease",
               display: "flex",
               alignItems: "center",
@@ -642,7 +651,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               height: "44px",
             }}
             onMouseEnter={(e) => {
-              if (inputValue.trim() && !(isLoading && messages.length === 0)) {
+              if (inputValue.trim() && isChatReady) {
                 e.currentTarget.style.backgroundColor = "#2563eb";
                 e.currentTarget.style.transform = "translateY(-1px)";
               }
@@ -653,7 +662,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               e.currentTarget.style.transform = "translateY(0)";
             }}
           >
-            {isLoading && messages.length === 0 ? (
+            {!isChatReady ? (
               <div
                 style={{
                   width: "16px",

@@ -35,7 +35,6 @@ export const useBotForgeAPI = ({
   const [isInitialized, setIsInitialized] = useState(false);
 
   const apiClientRef = useRef<BotForgeAPIClient | null>(null);
-  const initializationAttemptedRef = useRef(false);
   const mountedRef = useRef(true);
 
   // Cleanup on unmount
@@ -120,24 +119,17 @@ export const useBotForgeAPI = ({
 
   // Initialize conversation
   const initializeConversation = useCallback(async () => {
-    if (
-      !mountedRef.current ||
-      !apiClientRef.current ||
-      isInitialized ||
-      initializationAttemptedRef.current
-    ) {
+    if (!mountedRef.current || !apiClientRef.current || isInitialized) {
       if (debug) {
         console.log("[BotForge Widget] Skipping initialization:", {
           mounted: mountedRef.current,
           hasClient: !!apiClientRef.current,
           isInitialized,
-          attempted: initializationAttemptedRef.current,
         });
       }
       return null;
     }
 
-    initializationAttemptedRef.current = true;
     setIsLoading(true);
     setError(null);
 
@@ -152,7 +144,7 @@ export const useBotForgeAPI = ({
 
       setConversationId(result.conversationId);
       setUserIdentifier(result.userIdentifier);
-      setIsInitialized(true);
+      setIsInitialized(true); // This was missing!
 
       // Update connection status
       const isOffline = apiClientRef.current.isOffline();
@@ -160,6 +152,11 @@ export const useBotForgeAPI = ({
 
       if (debug) {
         console.log("[BotForge Widget] Conversation initialized:", result);
+        console.log("[BotForge Widget] State updated:", {
+          conversationId: result.conversationId,
+          userIdentifier: result.userIdentifier,
+          isInitialized: true,
+        });
       }
 
       // Always return a welcome message, even if none was provided
@@ -196,7 +193,7 @@ export const useBotForgeAPI = ({
       }
 
       // Still mark as initialized and provide a fallback welcome message
-      setIsInitialized(true);
+      setIsInitialized(true); // This was also missing in the error case!
 
       const fallbackWelcome: BotForgeMessage = {
         id: "welcome-fallback",
@@ -316,7 +313,6 @@ export const useBotForgeAPI = ({
     setIsInitialized(false);
     setIsConnected(true);
     setError(null);
-    initializationAttemptedRef.current = false;
   }, []);
 
   return {

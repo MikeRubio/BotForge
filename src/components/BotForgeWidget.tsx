@@ -305,7 +305,6 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
         isInitialized,
       });
     }
-
     return (
       <div
         ref={widgetRef}
@@ -322,6 +321,8 @@ export const BotForgeWidget = forwardRef<BotForgeAPI, BotForgeWidgetProps>(
             isConnected={isConnected}
             config={config}
             error={error}
+            isInitialized={isInitialized}
+            conversationId={conversationId}
           />
         )}
         <ChatButton
