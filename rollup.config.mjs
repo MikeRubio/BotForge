@@ -6,6 +6,7 @@ import terser from "@rollup/plugin-terser";
 import dts from "rollup-plugin-dts";
 import json from "@rollup/plugin-json";
 import nodePolyfills from "rollup-plugin-polyfill-node";
+import replace from "@rollup/plugin-replace";
 
 import fs from "fs";
 const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
@@ -15,9 +16,16 @@ const external = [
   "react-dom",
   "react-dom/client",
   "react/jsx-runtime",
+  /\/lib\//,
 ];
 
 const plugins = [
+  replace({
+    preventAssignment: true,
+    values: {
+      __VERSION__: JSON.stringify(packageJson.version),
+    },
+  }),
   nodePolyfills(),
   peerDepsExternal(),
   resolve({

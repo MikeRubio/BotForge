@@ -17,6 +17,3 @@ export type {
 // Utility exports
 export { BotForgeAPIClient, generateUserIdentifier } from "./utils/api";
 export { useBotForgeAPI } from "./hooks/useBotForgeAPI";
-
-// Version
-export const version = "1.0.0";
