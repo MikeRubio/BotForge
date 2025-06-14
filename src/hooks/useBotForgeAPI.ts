@@ -36,6 +36,7 @@ export const useBotForgeAPI = ({
 
   const apiClientRef = useRef<BotForgeAPIClient | null>(null);
   const mountedRef = useRef(true);
+  const initializationInProgressRef = useRef(false);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -47,9 +48,9 @@ export const useBotForgeAPI = ({
     };
   }, []);
 
-  // Initialize API client
+  // Initialize API client ONCE
   useEffect(() => {
-    if (!mountedRef.current) return;
+    if (!mountedRef.current || apiClientRef.current) return;
 
     try {
       if (!apiUrl || !anonKey) {
@@ -67,6 +68,10 @@ export const useBotForgeAPI = ({
       const identifier = user?.id || generateUserIdentifier();
       apiClientRef.current.setUserIdentifier(identifier);
       setUserIdentifier(identifier);
+
+      if (debug) {
+        console.log("[BotForge Widget] API client created successfully");
+      }
     } catch (err) {
       const error =
         err instanceof Error
@@ -81,12 +86,6 @@ export const useBotForgeAPI = ({
         );
       }
     }
-
-    return () => {
-      if (apiClientRef.current) {
-        apiClientRef.current.destroy();
-      }
-    };
   }, [chatbotId, apiUrl, anonKey, debug, user?.id]);
 
   // Monitor connection status
@@ -119,17 +118,24 @@ export const useBotForgeAPI = ({
 
   // Initialize conversation
   const initializeConversation = useCallback(async () => {
-    if (!mountedRef.current || !apiClientRef.current || isInitialized) {
+    if (
+      !mountedRef.current ||
+      !apiClientRef.current ||
+      isInitialized ||
+      initializationInProgressRef.current
+    ) {
       if (debug) {
         console.log("[BotForge Widget] Skipping initialization:", {
           mounted: mountedRef.current,
           hasClient: !!apiClientRef.current,
           isInitialized,
+          inProgress: initializationInProgressRef.current,
         });
       }
       return null;
     }
 
+    initializationInProgressRef.current = true;
     setIsLoading(true);
     setError(null);
 
@@ -142,9 +148,10 @@ export const useBotForgeAPI = ({
 
       if (!mountedRef.current) return null;
 
+      // CRITICAL: Update React state with the API result
       setConversationId(result.conversationId);
       setUserIdentifier(result.userIdentifier);
-      setIsInitialized(true); // This was missing!
+      setIsInitialized(true);
 
       // Update connection status
       const isOffline = apiClientRef.current.isOffline();
@@ -152,7 +159,7 @@ export const useBotForgeAPI = ({
 
       if (debug) {
         console.log("[BotForge Widget] Conversation initialized:", result);
-        console.log("[BotForge Widget] State updated:", {
+        console.log("[BotForge Widget] React state will be updated with:", {
           conversationId: result.conversationId,
           userIdentifier: result.userIdentifier,
           isInitialized: true,
@@ -193,7 +200,7 @@ export const useBotForgeAPI = ({
       }
 
       // Still mark as initialized and provide a fallback welcome message
-      setIsInitialized(true); // This was also missing in the error case!
+      setIsInitialized(true);
 
       const fallbackWelcome: BotForgeMessage = {
         id: "welcome-fallback",
@@ -209,6 +216,7 @@ export const useBotForgeAPI = ({
     } finally {
       if (mountedRef.current) {
         setIsLoading(false);
+        initializationInProgressRef.current = false;
       }
     }
   }, [debug, onError, isInitialized]);
@@ -313,6 +321,7 @@ export const useBotForgeAPI = ({
     setIsInitialized(false);
     setIsConnected(true);
     setError(null);
+    initializationInProgressRef.current = false;
   }, []);
 
   return {
