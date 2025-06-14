@@ -37,6 +37,7 @@ export const useBotForgeAPI = ({
   const apiClientRef = useRef<BotForgeAPIClient | null>(null);
   const mountedRef = useRef(true);
   const initializationInProgressRef = useRef(false);
+  const apiClientCreatedRef = useRef(false);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -48,13 +49,25 @@ export const useBotForgeAPI = ({
     };
   }, []);
 
-  // Initialize API client ONCE
+  // Initialize API client ONCE and ONLY ONCE
   useEffect(() => {
-    if (!mountedRef.current || apiClientRef.current) return;
+    if (!mountedRef.current || apiClientCreatedRef.current) {
+      if (debug) {
+        console.log("[BotForge Widget] Skipping API client creation:", {
+          mounted: mountedRef.current,
+          alreadyCreated: apiClientCreatedRef.current,
+        });
+      }
+      return;
+    }
 
     try {
       if (!apiUrl || !anonKey) {
         throw new Error("API URL and anonymous key are required");
+      }
+
+      if (debug) {
+        console.log("[BotForge Widget] Creating API client...");
       }
 
       apiClientRef.current = new BotForgeAPIClient(
@@ -68,6 +81,9 @@ export const useBotForgeAPI = ({
       const identifier = user?.id || generateUserIdentifier();
       apiClientRef.current.setUserIdentifier(identifier);
       setUserIdentifier(identifier);
+
+      // Mark as created to prevent recreation
+      apiClientCreatedRef.current = true;
 
       if (debug) {
         console.log("[BotForge Widget] API client created successfully");
@@ -159,7 +175,7 @@ export const useBotForgeAPI = ({
 
       if (debug) {
         console.log("[BotForge Widget] Conversation initialized:", result);
-        console.log("[BotForge Widget] React state will be updated with:", {
+        console.log("[BotForge Widget] React state updated with:", {
           conversationId: result.conversationId,
           userIdentifier: result.userIdentifier,
           isInitialized: true,
@@ -312,17 +328,24 @@ export const useBotForgeAPI = ({
     }
   }, [onError]);
 
-  // Reset conversation
+  // Reset conversation - DO NOT reset the API client
   const resetConversation = useCallback(() => {
-    if (apiClientRef.current) {
-      apiClientRef.current.reset();
+    if (debug) {
+      console.log("[BotForge Widget] Resetting conversation state only");
     }
+
+    // Only reset conversation-specific state, NOT the API client
     setConversationId(null);
     setIsInitialized(false);
     setIsConnected(true);
     setError(null);
     initializationInProgressRef.current = false;
-  }, []);
+
+    // Reset conversation in API client without destroying it
+    if (apiClientRef.current) {
+      apiClientRef.current.reset();
+    }
+  }, [debug]);
 
   return {
     // State
