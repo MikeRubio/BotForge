@@ -1,6 +1,6 @@
 {
   "name": "@botforge/widget",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "type": "module",
   "description": "Official BotForge chatbot widget for easy integration into any website or web application",
   "main": "dist/index.js",
